@@ -1,0 +1,1380 @@
+{
+  "name": "Agente Pessoal CLAUDIO",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# Agente Orquestrador\n",
+        "height": 260,
+        "width": 484,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        544,
+        48
+      ],
+      "typeVersion": 1,
+      "id": "8c7deb5f-6a27-496c-9337-dfe7da4aa159",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fe7ecc99-e1e8-4a5e-bdd6-6fce9757b234",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8f4f32d3-1647-48c6-b645-1e4168501f50",
+      "name": "Set 'Text'",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        96,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "bc59d056-38d0-4e94-8da2-028d4a9c725c"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8c844924-b2ed-48b0-935c-c66a8fd0c778",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "95654bb0-e9fc-4bfc-a801-488c80a9d8a7",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -176,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram (Gatilho)').item.json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        336
+      ],
+      "id": "33ef2c5c-6b45-41e6-a3cc-522a18598b02",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "eb7d0d9a-539b-4b3c-85d7-e8295d9537c4",
+      "name": "Telegram (Gatilho)",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        128
+      ],
+      "webhookId": "8afd87bf-a629-4629-b7a6-9510bc50be7c",
+      "credentials": {
+        "telegramApi": {
+          "id": "F1P29nZaNA8hAoSL",
+          "name": "Telegram claudio_brasileiro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "id": "a5018a7f-ba45-46f1-8e1d-f5b8435160dd",
+      "name": "Baixar Arquivo de Voz",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "8a63b183-f53e-437e-97ae-3de42459e798",
+      "credentials": {
+        "telegramApi": {
+          "id": "F1P29nZaNA8hAoSL",
+          "name": "Telegram claudio_brasileiro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram (Gatilho)').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "aa178d7f-2695-443c-96ae-a9c78bb00417",
+      "name": "Resposta",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        144
+      ],
+      "webhookId": "4cb7f825-1da8-4c55-af43-28d35bb63e07",
+      "credentials": {
+        "telegramApi": {
+          "id": "F1P29nZaNA8hAoSL",
+          "name": "Telegram claudio_brasileiro"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        336
+      ],
+      "id": "9704d138-b598-46fb-a464-cc85b02c6fbb",
+      "name": "Calculadora"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "02d818b3-0955-46f8-9e26-59a3498d3ce0",
+      "name": "Áudio para Texto",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        176,
+        0
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4.1-mini",
+        "options": {}
+      },
+      "id": "55275dec-a674-438d-82df-833c7d95ac17",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        448,
+        864
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "321f42646057d7b153d306da87833e0677271285f0a5ce277d8711c412f832f8@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Claudio Brasileiro"
+        },
+        "eventId": "={{ $fromAI(\"eventID\") }}",
+        "updateFields": {
+          "end": "={{ $fromAI(\"endTime\") }}",
+          "start": "={{ $fromAI(\"startTime\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        864
+      ],
+      "id": "e5bdc051-a92e-4338-8a2a-3cca935b18c7",
+      "name": "Atualizar Evento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "gXNghuvlwv9tzmLj",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "321f42646057d7b153d306da87833e0677271285f0a5ce277d8711c412f832f8@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Claudio Brasileiro"
+        },
+        "eventId": "={{ $fromAI(\"eventID\") }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        784,
+        864
+      ],
+      "id": "1be391dc-2860-462e-8c4b-d05859e46a0b",
+      "name": "Apagar Evento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "gXNghuvlwv9tzmLj",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "321f42646057d7b153d306da87833e0677271285f0a5ce277d8711c412f832f8@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Claudio Brasileiro"
+        },
+        "timeMin": "={{ $fromAI(\"dayBefore\",\"the day before the date the user requested\") }}",
+        "timeMax": "={{ $fromAI(\"dayAfter\",\"the day after the date the user requested\") }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        1008
+      ],
+      "id": "2dc9f332-168c-46a1-9edc-1017412be6d5",
+      "name": "Buscar Eventos",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "gXNghuvlwv9tzmLj",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "321f42646057d7b153d306da87833e0677271285f0a5ce277d8711c412f832f8@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Claudio Brasileiro"
+        },
+        "start": "={{ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "attendees": [],
+          "summary": "={{ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        1008
+      ],
+      "id": "984d0680-782e-4f2e-9d12-9e45e98f01ad",
+      "name": "Criar Evento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "gXNghuvlwv9tzmLj",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "321f42646057d7b153d306da87833e0677271285f0a5ce277d8711c412f832f8@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Claudio Brasileiro"
+        },
+        "start": "={{ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI('attendees0_Attendees', ``, 'string') }}"
+          ],
+          "summary": "={{ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        784,
+        1008
+      ],
+      "id": "aedeb670-6219-452c-b243-b2da5aa18bd3",
+      "name": "Criar Evento Com Participante",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "gXNghuvlwv9tzmLj",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to search the internet",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"api_key\": \"sua-chave-de-api\",\n    \"query\": \"{searchTerm}\",\n    \"search_depth\": \"basic\",\n    \"include_answer\": true,\n    \"topic\": \"news\",\n    \"include_raw_content\": true,\n    \"max_results\": 3\n} ",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "searchTerm",
+              "description": "What the user requested to write the blog post about",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1888,
+        880
+      ],
+      "id": "5614b620-0e03-48cb-b3eb-367c52a2fa45",
+      "name": "Tavily1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1648,
+        864
+      ],
+      "id": "b61dff6e-3194-451a-bb6f-a774906f3101",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI(\"emailAddress\") }}",
+        "subject": "={{ $fromAI(\"subject\") }}",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -64,
+        880
+      ],
+      "id": "ff208941-1759-4982-b539-a2b4ca536eee",
+      "name": "enviarEmail",
+      "webhookId": "53958b7a-386a-4af9-9c4b-b88f0e5f8388",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9NU72GqBlqsZOKsj",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $fromAI(\"ID\",\"the message ID\") }}",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        64,
+        880
+      ],
+      "id": "08fdee57-3ec1-4323-bcde-7a29894e3c4b",
+      "name": "responderEmail",
+      "webhookId": "c5109cc1-17eb-474b-838b-5ac50254b880",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9NU72GqBlqsZOKsj",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $fromAI(\"ID\",\"the ID of the message\") }}",
+        "labelIds": "={{ $fromAI(\"labelID\") }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        880
+      ],
+      "id": "cf1bfb5b-8d5b-4ffb-91ad-125e92cf21ae",
+      "name": "adicionarEtiqueta",
+      "webhookId": "ac466f3b-6397-454e-bebb-5b9519535843",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9NU72GqBlqsZOKsj",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": "={{ $fromAI(\"limit\",\"how many emails the user wants\") }}",
+        "simple": false,
+        "filters": {
+          "sender": "={{ $fromAI(\"sender\",\"who the emails are from\") }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -224,
+        1072
+      ],
+      "id": "50f15b74-c055-44ec-abad-23d181f1011e",
+      "name": "buscarEmails",
+      "webhookId": "76b1704b-8924-411c-ba98-d5e53e27aa51",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9NU72GqBlqsZOKsj",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        1072
+      ],
+      "id": "48c02f08-ef92-4af6-b4d1-f45460206657",
+      "name": "buscarEtiquetas",
+      "webhookId": "e3e65339-a55f-4c82-b145-16723a15285d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9NU72GqBlqsZOKsj",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsUnread",
+        "messageId": "={{ $fromAI(\"messageID\") }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        64,
+        1072
+      ],
+      "id": "c9d63ad1-ced7-4b50-bd9f-6780d4ff9732",
+      "name": "marcarComoNaoVisualizado",
+      "webhookId": "0f9a1ec9-f3d2-4aea-9881-0604a85a78fc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9NU72GqBlqsZOKsj",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $fromAI(\"subject\") }}",
+        "emailType": "html",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "sendTo": "={{ $fromAI(\"emailAddress\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        1072
+      ],
+      "id": "26df550c-7689-4023-b128-e16ad696e5d6",
+      "name": "criarEsboco",
+      "webhookId": "4d49b569-cd2a-4827-9bc6-5c024241fc60",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9NU72GqBlqsZOKsj",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4.1-mini",
+        "options": {}
+      },
+      "id": "1e81129c-384b-456c-8c76-d2f8d9ab6743",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        880
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "fields": [
+          "addresses",
+          "emailAddresses",
+          "names",
+          "phoneNumbers",
+          "organizations",
+          "birthdays",
+          "nicknames",
+          "biographies",
+          "urls",
+          "events"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        864
+      ],
+      "id": "d5176937-dfc9-4b6c-a75e-e29ae4e588c4",
+      "name": "Buscar Todos os Contatos do Google",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "AU0cVoHANPKNpJtl",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "fields": [
+          "addresses",
+          "emailAddresses",
+          "names",
+          "phoneNumbers",
+          "organizations",
+          "birthdays",
+          "nicknames",
+          "biographies",
+          "urls",
+          "events"
+        ],
+        "useQuery": true,
+        "query": "={{ $fromAI('name', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        864
+      ],
+      "id": "46382244-6e65-4880-a205-9990a5f17387",
+      "name": "Buscar Contatos",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "AU0cVoHANPKNpJtl",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "contactId": "={{ $fromAI('Contact_ID') }}",
+        "updateFields": {
+          "familyName": "={{ $fromAI('familyName') }}",
+          "givenName": "={{ $fromAI('givenName') }}",
+          "birthday": "={{ $fromAI('Birthday') }}",
+          "emailsUi": {
+            "emailsValues": [
+              {
+                "type": "home",
+                "value": "={{ $fromAI('emailAddress') }}"
+              }
+            ]
+          },
+          "phoneUi": {
+            "phoneValues": [
+              {
+                "type": "mobile",
+                "value": "={{ $fromAI('phoneNumber') }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        1040
+      ],
+      "id": "8017811f-03bc-47e8-b336-1abe7e33a53e",
+      "name": "Atualizar Contato",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "AU0cVoHANPKNpJtl",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "familyName": "={{ $fromAI('Family_Name', ``, 'string') }}",
+        "givenName": "={{ $fromAI('Given_Name', ``, 'string') }}",
+        "additionalFields": {
+          "birthday": "={{ $fromAI('Birthday', `Apenas adicione um aniversário caso seja requisitado. Não adicione um aniversário caso isso não tenha sido pedido.`, 'string') }}",
+          "emailsUi": {
+            "emailsValues": [
+              {
+                "type": "work",
+                "value": "={{ $fromAI('emailsValues0_Value', ``, 'string') }}"
+              }
+            ]
+          },
+          "biographies": "={{ $fromAI('Notes', ``, 'string') }}",
+          "phoneUi": {
+            "phoneValues": [
+              {
+                "type": "mobile",
+                "value": "={{ $fromAI('phoneValues0_Value', ``, 'string') }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        1040
+      ],
+      "id": "4b3593bf-c470-40a2-9bcb-2dc2144dfedb",
+      "name": "Criar Contato",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "AU0cVoHANPKNpJtl",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1056,
+        864
+      ],
+      "id": "f288120a-1ecf-44dc-ad71-a7509bf7d35b",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        336
+      ],
+      "id": "2e6e0515-f0e5-498b-9ea8-e76a7cece45e",
+      "name": "OpenAI Chat Model4",
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Você é um assistente de gerenciamento de e-mails",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=# Visão Geral\nVocê é um assistente de gerenciamento de e-mails. Todos os e-mails devem ser formatados profissionalmente em HTML e assinados como \"Peri Freitas\".\n\n**Ferramentas de Gerenciamento de E-mail**  \n- Use **\"enviarEmail\"** para enviar e-mails.  \n- Use **\"criarEsboco\"** se o usuário pedir um rascunho.  \n- Use **\"buscarEmails\"** para recuperar e-mails quando solicitado.  \n- Use **\"buscarEtiquetas\"** para recuperar etiquetas.  \n- Use **\"marcarComoNaoVisualizado\"** para marcar um e-mail como não lido. Você deve usar primeiro o \"Get Emails\" para obter o ID da mensagem a ser sinalizada. \n- Use **\"adicionarEtiqueta\"** para marcar um e-mail com uma etiqueta. Você deve usar primeiro o \"buscarEmails\" para obter o ID da mensagem a ser sinalizada. Depois, deve usar \"buscarEtiquetas\" para obter o ID da etiqueta.  \n- Use **\"responderEmail\"** para responder a um e-mail. Você deve usar primeiro o \"buscarEmails\" para obter o ID da mensagem a ser respondida.\n\n## Observações Finais\n- Aqui está a data/hora atual: {{ $now }}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        -208,
+        656
+      ],
+      "id": "ab8ca5cc-f0b7-4b30-b211-780316c4489d",
+      "name": "AgenteDeEmail"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Você é um assistente que gerencia meu calendário",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=# Visão Geral\nVocê é um assistente de calendário. Suas responsabilidades incluem criar, obter e excluir eventos no calendário do usuário. Sempre envie o link desse evento alterado/criado como parte do output.\n\n**Ferramentas de Gerenciamento de Calendário**  \n- Use **\"Criar Evento Com Participante\"** quando um evento incluir um participante. (É necessário ter o email do contato primeiro, para depois conseguir usar esse email como o attendee/participante do evento)  \n- Use **\"Criar Evento\"** para eventos individuais.  \n- Use **\"Buscar Eventos\"** para buscar agendas do calendário quando solicitado.  \n- Use **\"Apagar Evento\"** para excluir um evento. Você deve usar primeiro o \"Buscar Eventos\" para obter o ID do evento a ser excluído.  \n- Use **\"Atualizar Evento\"** para atualizar um evento. Você deve usar primeiro o \"Buscar Eventos\" para obter o ID do evento a ser atualizado.\n\n## Observações Finais\n- Para conseguir criar um evento com Participante é necessário termos o email desse contato.\n- Aqui está a data/hora atual: {{ $now }}  \nSe a duração de um evento não for especificada, assuma que terá uma hora.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        672
+      ],
+      "id": "4185bc6b-5751-49ea-877f-0130acbb2e87",
+      "name": "AgenteDeCalendario"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Você é um assistente que gerencia meus contatos.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=# Visão Geral\nVocê é um assistente de gerenciamento de contatos. Suas responsabilidades incluem procurar contatos, adicionar novos contatos ou atualizar as informações de um contato.\n\n# Ferramentas Disponíveis\n\n## 1. **Buscar Contatos**\n- Use esta ferramenta para encontrar um contato específico no Google Contacts.\n- O usuário pode solicitar um contato usando o primeiro nome, sobrenome ou nome completo.\n- **Sempre utilize esta ferramenta primeiro antes de recuperar todos os contatos.**\n\n## 2. **Buscar Todos os Contatos do Google**\n- Recupera uma lista de todos os contatos armazenados no Google Contacts.\n- **Use esta ferramenta SOMENTE se \"Buscar Contatos\" não encontrar o contato solicitado.**\n- Isso garante buscas eficientes e evita chamadas desnecessárias na API.\n\n## 3. **Atualizar Contato**\n- Use esta ferramenta para atualizar um contato existente no Google Contacts.\n- **Antes de atualizar um contato, certifique-se de ter o Contact ID correto obtido através do \"Buscar Contatos\".**\n- **Nunca presuma um Contact ID — sempre utilize o ID recuperado na busca.**\n\n## 4. **Criar Contato**\n- Use esta ferramenta para armazenar novas informações de contato quando um contato não existir.\n- **Antes de criar um contato, verifique se \"Buscar Contatos\" e \"Buscar Todos os Contatos do Google\" não encontraram uma correspondência.**\n- Se o usuário quiser adicionar um novo contato, use esta ferramenta.\n\n\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        688
+      ],
+      "id": "2cafe85c-a799-40d4-b8ef-d9adf99a111d",
+      "name": "AgenteDeContatos"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Você é um redator de blogs habilidoso.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=# Visão Geral\nVocê é um redator de blogs habilidoso especializado em conteúdos envolventes, bem estruturados e informativos. Seu estilo de escrita é claro, cativante e adaptado ao público-alvo. Você otimiza para legibilidade, SEO e valor, garantindo que os blogs sejam bem pesquisados, originais e livres de conteúdo irrelevante.\n\n## Ferramentas\nTavily - Use esta ferramenta para pesquisar na web sobre o tema solicitado para o post do blog.\n\n## Requisitos do Blog\nFormate todo o conteúdo do blog em HTML, utilizando cabeçalhos apropriados (<h1>, <h2>), parágrafos (<p>), listas com marcadores (<ul><li>) e links (<a href=\"URL\">) para citações. Todas as citações vindas da ferramenta Tavily devem ser preservadas, com hiperlinks clicáveis para que os leitores possam acessar as fontes originais.\n\nMantenha um tom natural e humano, utilize estruturas de frase variadas e inclua exemplos ou dados relevantes quando necessário. Estruture o conteúdo para fácil leitura, com parágrafos concisos e fluxo lógico. Sempre garanta precisão factual e alinhe o tom com a marca ou propósito pretendido.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        1664,
+        688
+      ],
+      "id": "74dd18c2-e2ba-4a97-a957-e8793a5b4d98",
+      "name": "CriadorDeConteudo"
+    },
+    {
+      "parameters": {
+        "content": "## Agente de Email",
+        "height": 656,
+        "width": 736,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        592
+      ],
+      "id": "ccfebff0-63ac-45b4-9c6d-f5861d0ec8fd",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## Agente de Calendário",
+        "height": 656,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        384,
+        592
+      ],
+      "id": "49b3aaa4-cbcb-4fe6-a0fe-5d456512cea0",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "## Agente de Contatos",
+        "height": 656,
+        "width": 544,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        992,
+        592
+      ],
+      "id": "333ca798-9122-4eef-9e1d-4c5a8d43b46e",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "## Agente Criador de Conteúdo",
+        "height": 496,
+        "width": 480,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        592
+      ],
+      "id": "182ff7d6-6aa5-4455-8bdc-e29e6d33dc10",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=# Visão Geral\nVocê é o agente orquestrador desse assistente pessoal com multi agentes. Seu trabalho é enviar a solicitação do usuário para a ferramenta correta. Você nunca deve escrever e-mails ou criar resumos — apenas precisa chamar a ferramenta certa. \n\n## Ferramentas\n- **AgenteDeEmail**: Use esta ferramenta para realizar ações no e-mail\n- **AgenteDeCalendario**: Use esta ferramenta para realizar ações no calendário\n- **AgenteDeContatos**: Use esta ferramenta para obter, atualizar ou adicionar contatos\n\n\n## Regras\n- Algumas ações exigem que você busque informações de contato primeiro. Para as seguintes ações, é necessário obter as informações de contato, aguardar receber essa resposta sobre os dados do contato e somente depois enviá-las ao agente responsável:\n  - enviar e-mails\n  - redigir e-mails\n  - criar evento no calendário com participante (sempre enviar o nome e email do contato)\n\n## Instruções\n1) Chame as ferramentas necessárias com base na solicitação do usuário  \n2) Use a ferramenta \"Think\" para verificar se você tomou as medidas corretas.\n\n## Exemplos\n1)\n  - Entrada: envie um e-mail para o Felipe Almeida perguntando que horas ele quer sair\n  - Ação: Use o AgenteDeContatos para obter o e-mail do Felipe Almeida\n  - Ação: Use o AgenteDeEmail para enviar o e-mail. Você passará à ferramenta uma solicitação como:  \n    \"envie um e-mail para Felipe Almeida perguntando que horas ele quer sair. aqui está o e-mail dele: [endereço de e-mail]\"\n- Saída: O e-mail foi enviado para Felipe Almeida. Posso ajudar em mais alguma coisa?\n\n## Lembretes Finais\nAqui está a data/hora atual: {{ $now }}\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        656,
+        144
+      ],
+      "id": "b94a67de-d5c0-47dc-a834-2e9a99ca9c8a",
+      "name": "Assistente Pessoal Completo"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        1008,
+        336
+      ],
+      "id": "ef2d6e21-c25f-404f-9a74-1513cfa7b0fa",
+      "name": "Think"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Baixar Arquivo de Voz",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set 'Text'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set 'Text'": {
+      "main": [
+        [
+          {
+            "node": "Assistente Pessoal Completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Assistente Pessoal Completo",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram (Gatilho)": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar Arquivo de Voz": {
+      "main": [
+        [
+          {
+            "node": "Áudio para Texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculadora": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente Pessoal Completo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Áudio para Texto": {
+      "main": [
+        [
+          {
+            "node": "Assistente Pessoal Completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AgenteDeCalendario",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeCalendario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apagar Evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeCalendario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Eventos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeCalendario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeCalendario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Evento Com Participante": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeCalendario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily1": {
+      "ai_tool": [
+        [
+          {
+            "node": "CriadorDeConteudo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "CriadorDeConteudo",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "enviarEmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeEmail",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "responderEmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeEmail",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "adicionarEtiqueta": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeEmail",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscarEmails": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeEmail",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscarEtiquetas": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeEmail",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "marcarComoNaoVisualizado": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeEmail",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "criarEsboco": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeEmail",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AgenteDeEmail",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Todos os Contatos do Google": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeContatos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Contatos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeContatos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Contato": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "Criar Contato": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgenteDeContatos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AgenteDeContatos",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Assistente Pessoal Completo",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AgenteDeEmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente Pessoal Completo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AgenteDeCalendario": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente Pessoal Completo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AgenteDeContatos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente Pessoal Completo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CriadorDeConteudo": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "Assistente Pessoal Completo": {
+      "main": [
+        [
+          {
+            "node": "Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente Pessoal Completo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "61116af4-8ab3-44e5-934b-9ca93e72fcf2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b1646430cd996814a4d81c1dfc7a9b1eaf95135bc455fab10103bd949f30c6d7"
+  },
+  "id": "wl9WkRW0xg64e32d",
+  "tags": []
+}

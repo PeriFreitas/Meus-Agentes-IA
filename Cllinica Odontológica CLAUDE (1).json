@@ -1,0 +1,656 @@
+{
+  "name": "Cllinica Odontológica CLAUDE",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-responses",
+        "options": {}
+      },
+      "id": "b711911b-0a80-4c69-aa45-f1c3bc695f4d",
+      "name": "Webhook: Resposta WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -2144,
+        -272
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "48d376af-6c2d-43dd-a26b-a702547bee65"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body?.message?.buttonResponse?.buttonId || '' }}",
+              "operation": "startsWith",
+              "value2": "confirmar_"
+            },
+            {
+              "value1": "={{ $json.body?.message?.buttonResponse?.buttonId || '' }}",
+              "operation": "startsWith",
+              "value2": "cancelar_"
+            }
+          ],
+          "combineOperation": "any"
+        },
+        "options": {}
+      },
+      "id": "78e7557b-6973-4c0d-89df-406f0ee06d1b",
+      "name": "IF: Resposta Válida?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1888,
+        -272
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.body.message.from }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"⚠️ Resposta inválida. Por favor, use apenas os botões 'Confirmar' ou 'Cancelar' para responder à notificação de consulta.\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "b12ac6a8-66fb-40f1-af8f-533e0e254462",
+      "name": "Erro: Resposta Inválida",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1952,
+        240
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery"
+      },
+      "id": "b5e6e94d-df04-4346-986e-93eaecb012c7",
+      "name": "Buscar Agendamento (Supabase)",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        -1568,
+        -272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.length }}",
+              "operation": "greaterThan",
+              "value2": 0
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d382067f-745d-4ca4-a404-f42c0a2f491e",
+      "name": "IF: Agendamento Encontrado?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1296,
+        -272
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Webhook: Resposta WhatsApp').item.json.body.message.from }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"❌ Agendamento não encontrado. Entre em contato com a clínica para mais informações.\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "aee813b8-4fb1-4476-aeb4-1a65ee163636",
+      "name": "Erro: Agendamento Não Encontrado",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1344,
+        240
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json[0].status }}",
+              "operation": "notEqual",
+              "value2": "pendente"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d1c52032-c246-4e6d-bd8e-0c5fb4851154",
+      "name": "IF: Já Processado?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1040,
+        -272
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json[0].numero_whatsapp }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"ℹ️ Este agendamento já foi processado anteriormente. Status atual: {{ $json[0].status }}.\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "efc73f05-4f0a-4e76-9785-ced61aff4d1d",
+      "name": "Erro: Já Processado",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1040,
+        240
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "dateTime": [
+            {
+              "value1": "={{ $json[0].data_hora }}",
+              "operation": "before",
+              "value2": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "26e6ff05-ae82-40fa-bf81-c798d39c3106",
+      "name": "IF: Consulta Já Passou?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -752,
+        -272
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json[0].numero_whatsapp }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"⏰ Esta consulta já ocorreu e não pode mais ser modificada. Entre em contato para reagendar.\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "c01f4fd3-a573-4ba9-a6d5-1b05e50863d0",
+      "name": "Erro: Consulta Expirada",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -752,
+        240
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $('Webhook: Resposta WhatsApp').item.json.body.message.buttonResponse.buttonId }}",
+              "operation": "startsWith",
+              "value2": "confirmar_"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1100d63a-e382-4c47-b658-f190dee60137",
+      "name": "IF: Confirmar?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -448,
+        -48
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "update"
+      },
+      "id": "636433d1-9ca9-443b-98c9-e3f9cec833a3",
+      "name": "Atualizar Status: Confirmado",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        -160,
+        -176
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json[0].numero_whatsapp }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"✅ Consulta confirmada com sucesso!\\n\\n📅 Data: {{ new Date($json[0].data_hora).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) }}\\n🕐 Horário: {{ new Date($json[0].data_hora).toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' }) }}\\n🦷 Tipo: {{ $json[0].tipo_consulta }}\\n\\nNos vemos em breve! 😊\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "bbc6b31e-8c5d-4db3-b5c2-0e2a70cbac44",
+      "name": "Enviar Confirmação (WhatsApp)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        448,
+        -176
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "eventId": "={{ $json[0].google_event_id }}",
+        "options": {}
+      },
+      "id": "3f5132da-a0df-445e-b005-d0204a31c675",
+      "name": "Deletar Evento (Google Calendar)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        -144,
+        144
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "update"
+      },
+      "id": "310fc26f-72c9-44be-8486-d6ace509e6ea",
+      "name": "Atualizar Status: Cancelado",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        160,
+        144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json[0].numero_whatsapp }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"❌ Consulta cancelada com sucesso.\\n\\n📞 Para reagendar, entre em contato conosco:\\n• WhatsApp: (85) 99999-9999\\n• Telefone: (85) 3333-3333\\n\\nObrigado pela preferência! 🦷\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "083dd2b0-791d-4673-9639-cdcb7f7c223d",
+      "name": "Enviar Cancelamento (WhatsApp)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        512,
+        368
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"5585999999999\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"🔔 NOTIFICAÇÃO CLÍNICA\\n\\n❌ Cancelamento recebido:\\n\\n👤 Paciente: {{ $json[0].nome_paciente }}\\n📅 Data: {{ new Date($json[0].data_hora).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) }}\\n🕐 Horário: {{ new Date($json[0].data_hora).toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' }) }}\\n🦷 Tipo: {{ $json[0].tipo_consulta }}\\n📱 Telefone: {{ $json[0].numero_whatsapp }}\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "04baa2f0-dd1d-41fb-98e6-f8a75daa449a",
+      "name": "Notificar Clínica (Cancelamento)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        832,
+        368
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {},
+      "id": "9601fb19-c890-4205-8fbe-a4fb5a2c22bc",
+      "name": "Log: Confirmação",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        144,
+        -176
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "8d252174-2117-44b0-97f1-9deb016d2265",
+      "name": "Log: Cancelamento",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        464,
+        144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Webhook: Resposta WhatsApp').item.json.body.message.from }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"⚠️ Ocorreu um erro ao processar sua solicitação. Nossa equipe foi notificada. Tente novamente em alguns minutos ou entre em contato diretamente.\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "53cfddc1-84b6-4ede-a91b-ff6417713f1d",
+      "name": "Erro: Falha no Processamento",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1648,
+        448
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json[0].numero_whatsapp }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"⚠️ Não foi possível deletar o evento do calendário. Nossa equipe foi notificada. Sua consulta foi cancelada no sistema.\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "27e6bce8-ece5-4953-a32d-4795d2ead3d5",
+      "name": "Erro: Falha Google Calendar",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -112,
+        384
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {},
+      "id": "02536683-c5e1-4a4a-9aa0-f3b52dbe297b",
+      "name": "Log: Erro Google Calendar",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        -112,
+        672
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "0f264971-9570-4d04-b0cc-01f6bea7865c",
+      "name": "Log: Erro Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        -1648,
+        640
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook: Resposta WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "IF: Resposta Válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Resposta Válida?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Agendamento (Supabase)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Resposta Inválida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Agendamento (Supabase)": {
+      "main": [
+        [
+          {
+            "node": "IF: Agendamento Encontrado?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log: Erro Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Agendamento Encontrado?": {
+      "main": [
+        [
+          {
+            "node": "IF: Já Processado?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Agendamento Não Encontrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Já Processado?": {
+      "main": [
+        [
+          {
+            "node": "Erro: Já Processado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF: Consulta Já Passou?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Consulta Já Passou?": {
+      "main": [
+        [
+          {
+            "node": "Erro: Consulta Expirada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF: Confirmar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Confirmar?": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Status: Confirmado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Deletar Evento (Google Calendar)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Status: Confirmado": {
+      "main": [
+        [
+          {
+            "node": "Log: Confirmação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deletar Evento (Google Calendar)": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Status: Cancelado",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log: Erro Google Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Status: Cancelado": {
+      "main": [
+        [
+          {
+            "node": "Log: Cancelamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log: Cancelamento": {
+      "main": [
+        [
+          {
+            "node": "Enviar Cancelamento (WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Cancelamento (WhatsApp)": {
+      "main": [
+        [
+          {
+            "node": "Notificar Clínica (Cancelamento)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log: Erro Supabase": {
+      "main": [
+        [
+          {
+            "node": "Erro: Falha no Processamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Confirmação (WhatsApp)": {
+      "main": [
+        []
+      ]
+    },
+    "Log: Confirmação": {
+      "main": [
+        [
+          {
+            "node": "Enviar Confirmação (WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5e0f7c58-fbe0-4727-b121-87f452387d82",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b1646430cd996814a4d81c1dfc7a9b1eaf95135bc455fab10103bd949f30c6d7"
+  },
+  "id": "JJfYdShuYzRvqAvl",
+  "tags": []
+}

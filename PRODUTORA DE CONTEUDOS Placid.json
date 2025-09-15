@@ -1,0 +1,323 @@
+{
+  "name": "PRODUTORA DE CONTEUDOS Placid",
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-5-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Você é um especialista em marketing para energia solar. Crie posts engajadores para Instagram/TikTok da Uzzi Energia Solar. Use linguagem acessível, foque em economia, sustentabilidade e benefícios. Inclua sempre um call-to-action. Máximo 100 palavras.",
+              "role": "system"
+            },
+            {
+              "content": "=Crie um post sobre um dos temas: economia na conta de luz, sustentabilidade, tecnologia solar, case de sucesso, dicas de consumo consciente, benefícios da energia solar, futuro da energia renovável. Seja criativo e engajador."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "97a9a652-6158-40b0-983a-a7d7ac488644",
+      "name": "OpenAI - Gerar Conteúdo",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        32
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Código completamente seguro - sem acessos diretos a propriedades\nconst items = $input.all();\n\n// Verificar se temos dados\nif (!items || items.length === 0) {\n    return {\n        \"texto_formatado\": \"Nenhum dado de entrada\",\n        \"timestamp\": new Date().toISOString().slice(0, -5),\n        \"texto_completo\": \"Nenhum dado de entrada\",\n        \"debug\": \"Sem itens de entrada\"\n    };\n}\n\nconst firstItem = items[0];\nlet content = \"\";\n\n// Tentar diferentes formas de extrair o texto\nif (firstItem.json) {\n    // Converter todo o JSON para string primeiro\n    const jsonStr = JSON.stringify(firstItem.json, null, 2);\n    \n    // Procurar por padrões de texto longo no JSON\n    const jsonObj = firstItem.json;\n    \n    // Lista de possíveis chaves onde pode estar o conteúdo\n    const possibleKeys = ['conteudo', 'content', 'texto', 'text', 'message', 'body', 'description'];\n    \n    // Função recursiva para procurar conteúdo\n    function findContent(obj, path = '') {\n        if (typeof obj === 'string' && obj.length > 20) {\n            return { content: obj, path: path };\n        }\n        \n        if (typeof obj === 'object' && obj !== null) {\n            for (const [key, value] of Object.entries(obj)) {\n                const result = findContent(value, path ? `${path}.${key}` : key);\n                if (result) return result;\n            }\n        }\n        \n        return null;\n    }\n    \n    const found = findContent(jsonObj);\n    \n    if (found) {\n        content = found.content;\n    } else {\n        // Se não encontrou, usar uma string do JSON como fallback\n        content = jsonStr.substring(0, 200);\n    }\n} else if (typeof firstItem === 'string') {\n    content = firstItem;\n} else {\n    content = JSON.stringify(firstItem).substring(0, 200);\n}\n\n// Garantir que temos uma string válida\nif (!content || typeof content !== 'string') {\n    content = \"Conteúdo não identificado\";\n}\n\n// Limpar o texto\nconst cleanText = content\n    .replace(/[{}\"\\\\]/g, ' ')  // Remove caracteres JSON\n    .replace(/\\n+/g, ' ')      // Remove quebras de linha\n    .replace(/\\s+/g, ' ')      // Remove espaços extras\n    .trim();                   // Remove espaços nas bordas\n\n// Versão curta\nconst shortText = cleanText.length > 80 ? \n    cleanText.substring(0, 77) + '...' : cleanText;\n\n// Timestamp\nconst timestamp = new Date().toISOString().slice(0, -5);\n\nreturn {\n    \"texto_formatado\": shortText,\n    \"timestamp\": timestamp,\n    \"texto_completo\": cleanText\n};"
+      },
+      "id": "fa7bed86-cec7-46d4-9651-d7cd6ec6165f",
+      "name": "Formatar Texto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1232,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.placid.app/api/rest/uvmtzyznu7mgt",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"create_now\": true,\n  \"layers\": {\n    \"text_layer\": \"{{ $json.post_text }}\",\n    \"logo_layer\": \"Uzzi Energia Solar\"\n  },\n  \"format\": \"jpg\",\n  \"width\": 1080,\n  \"height\": 1080\n}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "be678a32-d6b2-4f51-bda7-2ef1604093dc",
+      "name": "Placid - Gerar Imagem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -1056,
+        32
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CkARZoK9TCM5wJf2",
+          "name": "Header Auth account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "uzzi_social_posts",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "full_text",
+              "fieldValue": "={{ $('Formatar Texto').item.json.texto_completo }}\n\n"
+            },
+            {
+              "fieldId": "post_text",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "filename",
+              "fieldValue": "=imagem_{{ $json.id }}.jpg"
+            },
+            {
+              "fieldId": "image_url",
+              "fieldValue": "={{ $json.polling_url }}"
+            }
+          ]
+        }
+      },
+      "id": "275477fc-1109-4a3c-842e-29ff88f7a78e",
+      "name": "Supabase - Salvar Post",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        32
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5K8QedveA5xu99g3",
+          "name": "supabase bravaIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "error-condition",
+              "leftValue": "{{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "94e722d3-d376-4d7a-9d0a-76f6721f5940",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -832,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "uzzi_workflow_logs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "error_details",
+              "fieldValue": "={{$json}}"
+            },
+            {
+              "fieldId": "node_name",
+              "fieldValue": "Placid - Gerar Imagem"
+            }
+          ]
+        }
+      },
+      "id": "46d2ae07-15e1-4466-9979-26cc2b63950d",
+      "name": "Supabase - Log Error",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        240
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5K8QedveA5xu99g3",
+          "name": "supabase bravaIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1060369567",
+        "text": "=🚀 Novo post criado automaticamente!\n\n📝 Conteúdo: Teste envio do bot 🚀\n\n\n🖼️ Imagem ID: {{ $('Placid - Gerar Imagem').item.json.id }}\n\n💾 Salvo no Supabase: {{ $('Supabase - Salvar Post').item.json.id }}\n\n⏰ Status: Rascunho criado em {{ $('Supabase - Salvar Post').item.json.created_at }}\n\n🎯 Pronto para revisão e publicação!",
+        "additionalFields": {}
+      },
+      "id": "d70844fc-eaa7-4d2e-a3e7-359c1a38c18b",
+      "name": "Telegram - Notificação",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        32
+      ],
+      "webhookId": "e1d21eaf-3c03-4cab-ad78-f815d5371f5c",
+      "credentials": {
+        "telegramApi": {
+          "id": "Z8fAnhssYsmy3Xet",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        32
+      ],
+      "id": "d7347f04-c0a8-499b-a90a-44e35ad458a3",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {
+    "OpenAI - Gerar Conteúdo": [
+      {
+        "json": {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Quer reduzir sua conta de luz em até 95%? ☀️ Com a Uzzi Energia Solar você transforma o telhado em economia: menos gastos, previsibilidade e valorização do imóvel. Além de poupar, você ajuda o planeta! 🌱 Faça uma simulação grátis e descubra seu plano ideal. Comente \"QUERO\" ou clique no link na bio — vamos calcular sua economia hoje mesmo!",
+            "refusal": null,
+            "annotations": []
+          },
+          "finish_reason": "stop"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "OpenAI - Gerar Conteúdo": {
+      "main": [
+        [
+          {
+            "node": "Formatar Texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Texto": {
+      "main": [
+        [
+          {
+            "node": "Placid - Gerar Imagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Placid - Gerar Imagem": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Salvar Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Salvar Post": {
+      "main": [
+        [
+          {
+            "node": "Telegram - Notificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Handler": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Gerar Conteúdo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4eb1d3cc-9913-44ec-bb6e-670c49c95ed2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b1646430cd996814a4d81c1dfc7a9b1eaf95135bc455fab10103bd949f30c6d7"
+  },
+  "id": "mE3Ea1HHQEZVe8kW",
+  "tags": []
+}

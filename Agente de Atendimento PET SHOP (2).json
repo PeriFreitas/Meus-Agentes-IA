@@ -1,0 +1,2328 @@
+{
+  "name": "Agente de Atendimento PET SHOP",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "bc64f125-d93c-4d1d-97ae-65c0adb08b79",
+                    "leftValue": "={{ $('Webhook1').item.json.body.data.messageType }}",
+                    "rightValue": "conversation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "f7053057-3e82-49ad-a2bf-07bafc958f06",
+                    "leftValue": "={{ $('Webhook1').item.json.body.data.messageType }}",
+                    "rightValue": "extendedTextMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "137aec3f-e95e-4d59-b9ba-1140f9fc4fb4",
+                    "leftValue": "={{ $('Webhook1').item.json.body.data.messageType }}",
+                    "rightValue": "audioMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook1').item.json.body.data.messageType }}",
+                    "rightValue": "imageMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "40b284c8-fdf7-49e5-9ac3-8c5051f51521"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "imagem"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "7babc8fd-200c-4cb8-bc63-f999f57d5217",
+                    "leftValue": "={{ $('Webhook1').item.json.body.data.message.documentWithCaptionMessage.message.documentMessage.mimetype }}",
+                    "rightValue": "application/pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PDF"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Outro"
+        }
+      },
+      "id": "5124882e-7cf7-4be1-bd8e-b0a7c5a3e238",
+      "name": "Switch1",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        -5136,
+        -352
+      ],
+      "notesInFlow": true,
+      "notes": "Ajustar condições para cada tipo de mensagem a depender da sua entrada de dados\n\nTEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "=data",
+        "options": {
+          "language": "pt"
+        }
+      },
+      "id": "452f93d7-004e-414f-a654-abb94890c617",
+      "name": "Transcrever Áudio1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        -4432,
+        -368
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "=#Instruções\nO usuário te enviou uma imagem a qual você deve descrever.\n\nA imagem pode vir acompanhada de uma mensagem de texto (<MensagemUsuario>)\n\nCaso venha, utilize a mensagem anexa como contexto extra, tente capturar o sentimento da mensagem e objetivo pelo qual o usuário esteja enviando esta imagem na conversa.\n\nCrie uma resposta descrevendo as informações enviadas para que estas sejam utilizadas por um agente no futuro.\n\nLembre-se:\nEste agente apenas terá as informações que você fornecer, portanto repasse toda informação que julgar importante.\n\n#Dados\n<MensagemUsuario>\n{{ $json.MensagemImagem }}\n</MensagemUsuario>\n",
+        "inputType": "base64",
+        "options": {}
+      },
+      "id": "028933d8-4c98-481c-bef0-629d832053b2",
+      "name": "OpenAI1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        -4432,
+        -208
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4.1-mini",
+        "options": {
+          "temperature": "={{ $('Parametros Fluxo').item.json.ModeloTemperatura }}"
+        }
+      },
+      "id": "9c845067-3ecd-4ef3-b604-098bf5d3db67",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        -160
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "amount": "={{ $('Parametros Fluxo').item.json.EsperaBuffer }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3632,
+        -288
+      ],
+      "id": "04a01c62-2293-4cb2-9bde-4d0affba923c",
+      "name": "Wait1",
+      "webhookId": "169ea291-c3dc-4bca-854f-05520c979d7d",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1bd6c365-d077-4284-9dfe-94db1cbe39bd",
+              "leftValue": "={{ $('Buffer 3').item.json.messages.last() }}",
+              "rightValue": "={{ $('Buffer ').item.json.messages.last() }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3184,
+        -288
+      ],
+      "id": "86bc1bb2-e67a-414d-9ecb-3e43b75b80a9",
+      "name": "ComparandoMensagens1",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "66a91f66-e755-4120-b22f-44c814f56162",
+              "name": "message",
+              "value": "={{ $('Apagar Buffer1').item.json.messages.join('\\n\\n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2528,
+        -384
+      ],
+      "id": "1cd2ce5b-9029-4d14-a2a3-9a5424159343",
+      "name": "Mensagem1",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "leads_energia_solar",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone"
+            }
+          ]
+        }
+      },
+      "id": "902d7f3d-ded5-484e-b376-6eac719dc07b",
+      "name": "Encontrar Cliente1",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -2112,
+        -384
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "5K8QedveA5xu99g3",
+          "name": "supabase bravaIA"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "3419c30f-4400-401b-bf40-db1579507f96",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "41405042-09b9-4482-9eca-44c58e48c14b",
+      "name": "Cliente Existe?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.1,
+      "position": [
+        -1904,
+        -384
+      ],
+      "alwaysOutputData": false,
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "tableId": "leads_energia_solar",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('Dados Lead').item.json.LeadNome }}{{ $('Dados Lead').item.json.LeadNome }}"
+            },
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ $('Dados Lead').item.json.IdConversa }}"
+            }
+          ]
+        }
+      },
+      "id": "51ad6ada-db07-43ae-ba93-34cd4c6e6c62",
+      "name": "Criar Cliente1",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        -240
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5K8QedveA5xu99g3",
+          "name": "supabase bravaIA"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {},
+      "id": "a65d688b-cd5d-4df3-84ef-f2e3c2872e51",
+      "name": "Merge1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -1504,
+        -384
+      ],
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "messages",
+        "key": "={{ $('Dados Lead').item.json.IdConversa }}_buffer",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -3856,
+        -288
+      ],
+      "id": "7a4e81a7-9d94-47d0-84aa-84893e0b5863",
+      "name": "Buffer ",
+      "credentials": {
+        "redis": {
+          "id": "md4x1cgJ4BHGkFTt",
+          "name": "Redis account"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "messages",
+        "key": "={{ $('Dados Lead').item.json.IdConversa }}_buffer",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -3408,
+        -288
+      ],
+      "id": "85aabd9f-ef5f-4979-a394-a5cbd6f6615d",
+      "name": "Buffer 3",
+      "credentials": {
+        "redis": {
+          "id": "md4x1cgJ4BHGkFTt",
+          "name": "Redis account"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Dados Lead').item.json.IdConversa }}_buffer",
+        "messageData": "={{ $json.Texto }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4128,
+        -688
+      ],
+      "id": "5ac21ca5-0658-406f-a73e-4f857229e515",
+      "name": "Add Texto Buffer1",
+      "credentials": {
+        "redis": {
+          "id": "md4x1cgJ4BHGkFTt",
+          "name": "Redis account"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Dados Lead').item.json.IdConversa }}_buffer"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -2976,
+        -384
+      ],
+      "id": "ad86dc3e-8a4b-4f12-bcdf-6c8fb4e667a3",
+      "name": "Apagar Buffer1",
+      "credentials": {
+        "redis": {
+          "id": "md4x1cgJ4BHGkFTt",
+          "name": "Redis account"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Mensagem1').item.json.message }}",
+        "options": {
+          "systemMessage": "=\n\n## Identidade do Agente\nVocê é **Maya**, a assistente especializada em pets do Pet Shop Vida Animal. Você é uma profissional carinhosa, conhecedora e sempre disposta a ajudar tutores de pets com suas necessidades.\nEx.: \"Olá, tudo bem? Eu sou a Maya, assitente de atendimento da Pet Shop Vida Animal, como posso ajudar você e o seu Pet, agora?\"\n\n\n\n## Personalidade e Tom\n- **Carinhosa e empática**: Trate cada pet como um membro da família\n- **Profissional e confiável**: Forneça informações precisas e atualizadas\n- **Proativa**: Ofereça sugestões e dicas relevantes\n- **Paciente**: Explique detalhadamente quando necessário\n- **Otimista**: Mantenha sempre um tom positivo e acolhedor\n\n## Informações da Empresa\n**Pet Shop Vida Animal**\n- Endereço: Rua das Flores, 123 - Centro, Fortaleza/CE\n- Telefone: (85) 3333-4444\n- Horário: Segunda a Sábado, 8h às 18h | Domingo, 8h às 14h\n- WhatsApp: (85) 99999-8888\n- Instagram: @petshopvidaanimal\n- Formas de pagamento: Dinheiro, cartão (débito/crédito), Pix\n- Entrega: Grátis acima de R$ 80 (raio de 10km)\n\n## Produtos e Serviços\n\n### Produtos Disponíveis\n- **Rações**: Premium, super premium e standard para cães, gatos, aves e peixes\n- **Petiscos e snacks**: Naturais, funcionais e para treinamento\n- **Brinquedos**: Interativos, mordedores, bolinhas, cordas\n- **Acessórios**: Coleiras, guias, camas, comedouros, bebedouros\n- **Higiene**: Shampoos, condicionadores, escovas, cortadores de unha\n- **Medicamentos**: Vermífugos, antipulgas, vitaminas (sob orientação)\n- **Aquarismo**: Rações, equipamentos, decoração para aquários\n\n### Serviços Oferecidos\n- **Banho e Tosa**: Higiênico (R$ 25-45), completo (R$ 35-60), tosa criativa (R$ 50-80)\n- **Veterinário**: Consultas (R$ 80), vacinação (R$ 30-50), exames\n- **Hospedagem**: Diária cão pequeno (R$ 40), médio (R$ 50), grande (R$ 60)\n- **Adestramento**: Aulas individuais (R$ 80/hora), pacotes mensais\n- **Delivery**: Taxa R$ 8 (grátis acima de R$ 80)\n\n## Funcionalidades que Você Deve Oferecer\n\n### 1. Atendimento Geral\n- Informações sobre produtos e preços\n- Disponibilidade de itens em estoque\n- Orientações sobre uso de produtos\n- Dicas de cuidados com pets\n\n### 2. Agendamentos (DEMO - Simule Disponibilidade)\n- **Banho e Tosa**: Sempre mostre 2-3 horários disponíveis nos próximos dias\n  - Exemplo: \"Tenho disponível: Amanhã às 14h, Sexta às 10h e Sábado às 9h\"\n- **Veterinário**: Simule agenda com Dr. Carlos e Dra. Ana\n  - Exemplo: \"Dr. Carlos tem vaga quinta às 16h, Dra. Ana tem terça às 11h\"\n- **Hospedagem**: Simule canis disponíveis\n  - Exemplo: \"Temos 2 canis grandes e 3 pequenos disponíveis para essa data\"\n\n### 3. Pedidos e Entregas (DEMO - Use Exemplos)\n- **Consulta de pedidos**: Use números fictícios\n  - Exemplo: \"Seu pedido #PV2025-789 está sendo preparado, entrega prevista para amanhã\"\n- **Rastreamento**: Simule status realistas\n  - Exemplo: \"Pedido saiu para entrega às 14h30, previsão: até 17h\"\n- **Cálculo de frete**: Use endereços de Fortaleza\n  - \"Para o bairro Aldeota, entrega em 2h - Taxa: R$ 8 (grátis acima de R$ 80)\"\n\n### 4. Recomendações Personalizadas\n- Sugerir ração baseada na idade, porte e necessidades específicas\n- Recomendar produtos para problemas específicos\n- Indicar frequência ideal de banho e tosa\n- Alertar sobre calendário de vacinação\n\n### 5. Funcionalidades DEMO Especiais\n\n#### A) Consulta de Estoque (Simule Dados Realistas)\nQuando perguntarem sobre produtos, use estes exemplos:\n- \"Ração Royal Canin Adulto 15kg: 8 unidades em estoque - R$ 289,90\"\n- \"Shampoo antipulgas: 15 unidades disponíveis - R$ 32,50\"\n- \"Brinquedo Kong médio: Últimas 3 unidades - R$ 45,90\"\n\n#### B) Histórico do Cliente (Use Perfis Fictícios)\nQuando alguém se identificar, simule histórico:\n- \"Vejo aqui que seu Golden 'Rex' fez banho e tosa em 15/08. Como ele está?\"\n- \"Sua gata 'Luna' está em dia com a vacina V4, próxima dose em dezembro\"\n- \"Você sempre compra ração Premier, temos uma promoção hoje!\"\n\n#### C) Promoções Ativas (Sempre Tenha Ofertas)\n- \"Hoje: 15% off em rações premium acima de R$ 100\"\n- \"Combo banho + tosa + hidratação: R$ 65 (economize R$ 15)\"\n- \"Leve 2 brinquedos, pague 1 - válido até sexta!\"\n\n#### D) Agendamento com Confirmação Visual\nQuando fizerem agendamento, formate assim:\n```\n✅ AGENDAMENTO CONFIRMADO\nPet: [nome do pet]\nServiço: Banho e Tosa Completa\nData: Sexta-feira, 30/08\nHorário: 14h00\nValor: R$ 45,00\nCódigo: #AG-2025-456\n\nLembretes serão enviados por WhatsApp!\n```\n\n#### E) Calculadora de Ração (Ferramenta Útil)\nQuando perguntarem sobre quantidade de ração:\n- \"Para um Labrador de 30kg, recomendo 300-350g por dia\"\n- \"Dividindo em 2 refeições: 150g de manhã, 175g à tarde\"\n- \"Um saco de 15kg durará aproximadamente 45 dias\"\n\n#### F) Emergência Pet (Lista de Sintomas)\nSe mencionarem que o pet não está bem:\n\"Sintomas que requerem atenção imediata:\n🚨 Dificuldade para respirar\n🚨 Vômito com sangue\n🚨 Não consegue urinar\n🚨 Convulsões\n\nClínica 24h: Hospital Vet Care (85) 3333-5555\"\n\n## Base de Conhecimento Essencial\n\n### Alimentação\n- **Filhotes**: 3-4 refeições/dia até 6 meses\n- **Adultos**: 2 refeições/dia\n- **Idosos**: Ração específica com menor teor calórico\n- **Quantidade**: Seguir tabela do fabricante conforme peso\n\n### Vacinação (Cães)\n- **V8 ou V10**: 45, 60 e 90 dias (filhotes) | Anual (adultos)\n- **Antirrábica**: 4 meses (filhotes) | Anual (adultos)\n- **Gripe canina**: Opcional, semestral\n\n### Vacinação (Gatos)\n- **V3 ou V4**: 60 e 90 dias (filhotes) | Anual (adultos)\n- **Antirrábica**: 4 meses (filhotes) | Anual (adultos)\n\n### Vermifugação\n- **Filhotes**: Quinzenal até 6 meses\n- **Adultos**: A cada 6 meses\n- **Gestantes**: Conforme orientação veterinária\n\n## Situações Específicas de Atendimento\n\n### Quando Transferir para Humano\n- Emergências veterinárias\n- Reclamações complexas\n- Solicitações de orçamentos muito específicos\n- Negociações de preço\n- Problemas técnicos com pedidos\n\n### Frases de Transição\n- \"Vou conectar você com um dos nossos especialistas...\"\n- \"Para essa situação específica, nosso veterinário pode te orientar melhor...\"\n- \"Vou transferir você para nossa equipe técnica...\"\n\n### Urgências\n- Sempre pergunte sobre o estado do animal\n- Oriente procurar veterinário imediatamente se necessário\n- Forneça contato de emergência: Clínica 24h (85) 3333-5555\n\n## Exemplos de Interação DEMO\n\n### Saudação Inicial\n\"Oi! Eu sou a Maya, assistente do Pet Shop Vida Animal! 🐾 Como posso ajudar você e seu pet hoje?\"\n\n### Consulta de Produto com Estoque\n**Cliente**: \"Tem ração para Golden Retriever?\"\n**Maya**: \"Sim! Temos várias opções para Golden:\n• Royal Canin Golden Adulto 12kg - R$ 245,90 (6 unidades)\n• Premier Golden Adulto 15kg - R$ 189,90 (12 unidades) \n• Farmina Golden Adulto 10kg - R$ 198,50 (4 unidades)\nQual idade tem seu Golden? Para filhotes temos opções específicas!\"\n\n### Agendamento Completo\n**Cliente**: \"Quero agendar banho para minha poodle\"\n**Maya**: \"Perfeito! Para poodle recomendo nosso banho + tosa higiênica. Tenho disponível:\n• Amanhã (24/08) às 14h - R$ 42,00\n• Sexta (25/08) às 10h - R$ 42,00  \n• Sábado (26/08) às 9h - R$ 45,00\n\nQual nome da sua poodle e seu telefone para confirmar?\"\n\n**Cliente**: \"Luna, meu telefone é 85 99999-1234, quero amanhã às 14h\"\n**Maya**: \n```\n✅ AGENDAMENTO CONFIRMADO\nPet: Luna (Poodle)\nServiço: Banho + Tosa Higiênica\nData: Sábado, 24/08\nHorário: 14h00\nValor: R$ 42,00\nCódigo: #AG-2025-234\n\nLembrete será enviado por WhatsApp 2h antes!\nEndereço: Rua das Flores, 123 - Centro\n```\n\n### Consulta de Pedido\n**Cliente**: \"Como está meu pedido?\"\n**Maya**: \"Me informe seu nome ou número do pedido para consultar!\"\n**Cliente**: \"João Silva\"\n**Maya**: \"Encontrei seu pedido, João:\n\n📦 **Pedido #PV-2025-567**\n• 1x Ração Premier Cães Adultos 15kg\n• 2x Petisco Natural Ossinho\n• 1x Shampoo Antipulgas\n**Total**: R$ 156,80\n**Status**: Saiu para entrega às 15h20\n**Previsão**: Até 18h hoje\n**Entregador**: Carlos - (85) 98888-7777\"\n\n### Recomendação com Cálculo\n**Cliente**: \"Meu pastor alemão de 35kg, quanto de ração dar?\"\n**Maya**: \"Para um Pastor Alemão adulto de 35kg, recomendo:\n• **Quantidade diária**: 350-400g \n• **Divisão**: 175g manhã + 175g tarde\n• **Ração indicada**: Royal Canin Pastor Alemão ou Premier Raças Grandes\n\nUm saco de 15kg durará cerca de 40 dias. Temos Premier 15kg por R$ 168,90 em promoção hoje (15% off). Quer que eu separe um saco?\"\n\n## Diretrizes Importantes DEMO\n- **Sempre simule dados realistas**: Use números de pedidos, horários, estoques fictícios mas críveis\n- **Confirme informações importantes**: Agendamentos, endereços, telefones\n- **Seja proativa**: \"Já que vai buscar ração, precisa de algum petisco? Temos promoção!\"\n- **Use formatação visual**: Caixas, emojis, listas para organizar informações\n- **Simule urgência quando apropriado**: \"Últimas 3 unidades\", \"Promoção válida até sexta\"\n- **Mantenha histórico da conversa**: Lembre do que foi dito anteriormente\n- **Ofereça sempre 2-3 opções**: Nunca responda só \"não temos\"\n- **Use linguagem local**: Bairros de Fortaleza, expressões regionais quando natural\n\n### Banco de Dados DEMO - Use Essas Informações\n\n#### Produtos em Estoque (Sempre Disponíveis)\n```\nRAÇÕES CÃES:\n• Royal Canin Mini Adulto 7,5kg - R$ 178,90 (8 unidades)\n• Premier Cães Adultos 15kg - R$ 156,80 (15 unidades) \n• Golden Formula Adulto 15kg - R$ 142,50 (10 unidades)\n• Pedigree Adulto 10kg - R$ 89,90 (20 unidades)\n\nRAÇÕES GATOS:\n• Whiskas Adulto 10kg - R$ 95,90 (12 unidades)\n• Royal Canin Gatos 7,5kg - R$ 165,90 (6 unidades)\n• Premier Gatos Adultos 10kg - R$ 128,90 (8 unidades)\n\nACESSÓRIOS:\n• Coleira regulável P/M/G - R$ 15,90/18,90/22,90\n• Comedouro inox duplo - R$ 34,90 (25 unidades)\n• Cama pet tamanho M - R$ 89,90 (8 unidades)\n• Brinquedo corda - R$ 12,90 (30 unidades)\n\nHIGIENE:\n• Shampoo neutro 500ml - R$ 18,90 (22 unidades)\n• Condicionador 500ml - R$ 22,50 (18 unidades)\n• Antipulgas spray - R$ 28,90 (12 unidades)\n```\n\n#### Agenda Veterinária DEMO\n```\nDR. CARLOS (Clínico Geral):\n• Terça: 16h, 17h disponível\n• Quinta: 11h, 15h, 16h disponível  \n• Sábado: 9h, 10h disponível\n\nDRA. ANA (Especialista em Felinos):\n• Segunda: 14h, 15h, 17h disponível\n• Quarta: 10h, 11h, 16h disponível\n• Sexta: 9h, 14h, 15h disponível\n```\n\n#### Horários Banho e Tosa DEMO\n```\nHOJE: 16h, 17h\nAMANHÃ: 9h, 10h, 14h, 15h\nSEXTA: 8h, 10h, 13h, 16h\nSÁBADO: 8h, 9h, 11h, 14h\n```\n\n## Limitações\n- Não prescreva medicamentos (sempre oriente procurar veterinário)\n- Não faça diagnósticos médicos\n- Não negocie preços além das promoções vigentes\n- Não confirme agendamentos sem verificar disponibilidade real\n\n---\n\n**Lembre-se**: Você representa o Pet Shop Vida Animal e seu objetivo é proporcionar a melhor experiência possível para tutores e seus pets, sempre priorizando a saúde e bem-estar dos animais.\n\n\n# Variáveis\nData atual: {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -1104,
+        -384
+      ],
+      "id": "4cfe410a-6152-457b-b8b9-6deb6ac69bc7",
+      "name": "AI Agent1",
+      "retryOnFail": true,
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "24aa4532-80db-4c1e-977a-0036b82a8e5f",
+              "leftValue": "=",
+              "rightValue": "false",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f631295d-898a-408f-a851-ea25ee95ed04",
+      "name": "Filtro Inicial1",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.1,
+      "position": [
+        -6464,
+        -304
+      ],
+      "disabled": true,
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1ce011b-bd95-468e-863e-f2076f644cf9",
+              "name": "Texto",
+              "value": "={{ $('Webhook1').item.json.body.data.message.conversation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4912,
+        -688
+      ],
+      "id": "38a4499a-1a50-4842-a33b-336e155840d1",
+      "name": "Mensagem Texto1",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5efc6961-1ff7-4ef2-a772-7e9761592a3e",
+              "name": "Audio",
+              "value": "={{ $('Webhook1').item.json.body.data.message.base64 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4912,
+        -368
+      ],
+      "id": "50dd5a60-b985-4cbe-99d3-5f678752d3cc",
+      "name": "Mensagem Audio1",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5efc6961-1ff7-4ef2-a772-7e9761592a3e",
+              "name": "Imagem",
+              "value": "={{ $('Webhook1').item.json.body.data.message.base64 }}",
+              "type": "string"
+            },
+            {
+              "id": "f5c70ab5-7671-4bc8-9d23-65b8954ddb08",
+              "name": "MensagemImagem",
+              "value": "={{ $('Webhook1').item.json.body.data.message.imageMessage.caption }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4912,
+        -208
+      ],
+      "id": "e879593e-5ee5-43b5-a957-9724a7db6630",
+      "name": "Mensagem Imagem1",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Dados Lead').item.json.IdConversa }}_buffer",
+        "messageData": "={{ $json.text }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4128,
+        -368
+      ],
+      "id": "68aa9087-054d-48c2-baf2-2b05f8280e9b",
+      "name": "Add Audio Buffer1",
+      "credentials": {
+        "redis": {
+          "id": "md4x1cgJ4BHGkFTt",
+          "name": "Redis account"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Dados Lead').item.json.IdConversa }}_buffer",
+        "messageData": "={{ $json.Erro }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4128,
+        160
+      ],
+      "id": "5fbd0126-2367-47e8-b1b5-d34d07459bf0",
+      "name": "Add Error Buffer1",
+      "credentials": {
+        "redis": {
+          "id": "md4x1cgJ4BHGkFTt",
+          "name": "Redis account"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -4432,
+        -48
+      ],
+      "id": "65dc649f-2be9-4c40-a4dc-78ccf9a7730c",
+      "name": "Extract from File",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "11dc126a-e72e-431b-8db5-c78168c69439",
+              "name": "Erro",
+              "value": "<ErroFormatoMensagem>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4912,
+        160
+      ],
+      "id": "a496dde7-ad71-4f7c-b86c-91dbe124b863",
+      "name": "Mensagem Erro1",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Dados Lead').item.json.IdConversa }}_buffer",
+        "messageData": "=<ContextoPDF>\n  <TranscricaoPDF>\n{{ $json.text }}\n  </TranscricaoPDF>\nContexto Extra: O usuário encaminhou a mensagem a seguir junto ao PDF.\n  <MensagemUsuario>\n{{ $('Mensagem Documento PDF').item.json.MensagemDocumento }}\n  </MensagemUsuario>\n</ContextoPDF>",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4128,
+        -48
+      ],
+      "id": "52c83d4d-a4a5-4715-b81c-2dc44fc72dbd",
+      "name": "Add PDF Buffer1",
+      "credentials": {
+        "redis": {
+          "id": "md4x1cgJ4BHGkFTt",
+          "name": "Redis account"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Dados Lead').item.json.IdConversa }}_buffer",
+        "messageData": "=<ContextoImagem>\n\n  <DetalheImagem>\n{{ $json.content }}\n  </DetalheImagem>\n\nContexto Extra: O usuário encaminhou a mensagem a seguir junto á imagem.\n  <MensagemUsuario>\n{{ $('Mensagem Imagem1').item.json.MensagemImagem }}\n  </MensagemUsuario>\n\n</ContextoImagem>",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4128,
+        -208
+      ],
+      "id": "27724228-5425-40bc-86ee-9c3a941a3717",
+      "name": "Add Imagem Buffer1",
+      "credentials": {
+        "redis": {
+          "id": "md4x1cgJ4BHGkFTt",
+          "name": "Redis account"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.mensagens",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -384
+      ],
+      "id": "29d541d6-58d6-470c-ba6e-6004fdecf42a",
+      "name": "Split Out1",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        80,
+        -384
+      ],
+      "id": "3c731e46-9864-4f34-a6f4-f2f220dcc714",
+      "name": "Loop Over Items1",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        656,
+        -112
+      ],
+      "id": "33e7d12a-da6f-496f-a42d-58e5f6f67002",
+      "name": "Wait3",
+      "webhookId": "65ff8064-0a3a-4195-bf63-5cc130c8fe48",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        384,
+        -576
+      ],
+      "id": "b5fe6b22-c9cc-4990-8051-9f9863c64f57",
+      "name": "No Operation, do nothing5",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserAutofixing",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        -208
+      ],
+      "id": "661ed665-ea00-4605-9c6a-613239c34735",
+      "name": "Auto-fixing Output Parser1",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "AgenteStatus",
+        "key": "={{ $('Parametros Fluxo').item.json.IdAgente }}_status_{{ $('Dados Lead').item.json.IdConversa }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -5808,
+        -304
+      ],
+      "id": "17b3bc34-8757-49c1-a6bb-980a026ad884",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "md4x1cgJ4BHGkFTt",
+          "name": "Redis account"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -2976,
+        -192
+      ],
+      "id": "d50d4a00-69e6-4505-86c7-62c5fbad5fc1",
+      "name": "No Operation, do nothing6",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "756ab323-31a2-4a59-92e8-c2c695027962",
+              "leftValue": "={{ $json.AgenteStatus }}",
+              "rightValue": "Desativado",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -5648,
+        -304
+      ],
+      "id": "a7f01e43-2c35-425d-9532-e2dfecce1f58",
+      "name": "Bot Desativado?1",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -608,
+        -48
+      ],
+      "id": "e0a2efa2-15b3-4073-b9ec-84521e460f31",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Gatilho\nChat Trigger, WhatsApp, Instagram, Telegram, Messenger, etc..",
+        "height": 540,
+        "width": 340,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -7296,
+        -544
+      ],
+      "id": "a0607ac7-bcdc-4c1d-9c69-d86915eb40c1",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Variáveis do Fluxo\nCentral de controle do workflow",
+        "height": 540,
+        "width": 340,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -6944,
+        -544
+      ],
+      "id": "780c9b79-3583-46b6-a52c-14a553c77443",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Filtros Iniciais\nPara evitar que fluxo seja executado quando não queremos",
+        "height": 540,
+        "width": 340,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -6592,
+        -544
+      ],
+      "id": "65cedcb0-b287-41e7-b6b4-1a5fb9c7a112",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Dados do Lead\nInformações principais sobre o lead",
+        "height": 540,
+        "width": 340,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -6224,
+        -544
+      ],
+      "id": "fec3addb-fc4c-448e-8c12-f5c8c019b3b7",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Gestão de Fluxo Agente Desativado (Humano em Atendimento)\nGestão do fluxo para atendimento humano.\n",
+        "height": 540,
+        "width": 600,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -5872,
+        -544
+      ],
+      "id": "c9d17f9c-2cbf-490a-ade7-4b6c052c22df",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Registro do Lead no banco de dados (Supabase)\nFluxo para adição do lead no banco de dados postgrees supabase.",
+        "height": 732,
+        "width": 950,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2256,
+        -640
+      ],
+      "id": "73e345af-54c3-4ae2-90e2-76d01a6d1c1a",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Tratamento de Mensagens\nPermitir com que agente entenda texto, áudio, imagem, documentos, etc..",
+        "height": 1220,
+        "width": 1020,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -5248,
+        -896
+      ],
+      "id": "e4ef01e6-fc32-4450-96ac-50372b6dcc0c",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## Buffer de Mensagens\nGarantir que agente compreenda todo o contexto das mensagens enviadas pelo usuário antes de formular uma resposta",
+        "height": 1220,
+        "width": 1504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4208,
+        -896
+      ],
+      "id": "a67e1c84-e8f3-448b-90b0-1e0fef57e156",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "## Mensagem para o Agente\nMensagem final do usuário para o agente",
+        "height": 540,
+        "width": 372,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2656,
+        -560
+      ],
+      "id": "4d8c8ed0-4634-402c-a64d-4bff85c9dacb",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## Agente de IA\nAgente inteligente com memória e prompt pré formatado",
+        "height": 760,
+        "width": 596,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        -656
+      ],
+      "id": "d79bce2a-8e74-48b3-9db6-fbd36d145bf4",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "## Humanizar Resposta\nQuebra de mensagens em mensagens menores e com contexto.",
+        "height": 760,
+        "width": 580,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        -656
+      ],
+      "id": "f9c7a837-0f72-4cbe-a805-57217803707c",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "## Envio das Respostas ao Usuário\nEnvio das mensagens quebradas para o usuário",
+        "height": 760,
+        "width": 900,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -656
+      ],
+      "id": "8d0d4d38-7f28-4a94-9111-e6a1dca19bff",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 1668,
+        "width": 8220,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -7376,
+        -1168
+      ],
+      "id": "1e2e7398-2d96-41d4-81d2-dac838793bd8",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "-\n# FLUXO MESTRE AGENTE DE IA\n-",
+        "height": 140,
+        "width": 580,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3376,
+        -1136
+      ],
+      "id": "57a7284f-4dc0-4aa9-a2ff-009da14f8a4d",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9f488c5c-0b3b-48e9-87b1-5a22d513d1ec",
+              "name": "IdConversa",
+              "value": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "69f6217f-9063-423f-abf4-e94f6b70f94e",
+              "name": "LeadNome",
+              "value": "={{ $('Webhook1').item.json.body.data.pushName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "df0ff353-c4f6-4a20-974b-4514f67aa855",
+      "name": "Dados Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -6112,
+        -304
+      ],
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "content": "Ajuste o Node Set com os campos relevantes fornecidos.\n",
+        "height": 280,
+        "width": 210,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -6176,
+        -432
+      ],
+      "id": "a7657788-6afe-4d91-b186-cfc7b348a6bb",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Ajustes os filtros necessários conforme seu gatilho de entrada",
+        "height": 280,
+        "width": 190,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -6512,
+        -432
+      ],
+      "id": "97ac4551-0a83-4aba-a281-cf2aeb5f39e1",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Ajuste tempos de buffer e inatividade do agente conforme necessidade.\n",
+        "height": 280,
+        "width": 190,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -6864,
+        -432
+      ],
+      "id": "7f816fb7-4fb7-4cda-9524-43a94ba79e9b",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "content": "### Tipos de Mensagens\nDefina no node Switch as condicionais para definir cada tipo de mídia de acordo com seu gatilho de entrada de dados.\n\nEm cada Node Set:\nMapeie os campos de cada\ntipo de mensagem corretamente.\n\nObs: Não altere o nome\ndos campos pré existentes\nnos nodes SET",
+        "height": 1080,
+        "width": 450,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -5184,
+        -784
+      ],
+      "id": "652a2daf-3a9f-4689-8e17-d6479eb764a8",
+      "name": "Sticky Note19"
+    },
+    {
+      "parameters": {
+        "content": "Faça os ajustes necessários no Prompt do seu agente",
+        "height": 220,
+        "width": 330,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        -448
+      ],
+      "id": "01290a5b-60af-4e4c-81be-6f50a3ac00ed",
+      "name": "Sticky Note21"
+    },
+    {
+      "parameters": {
+        "content": "Ajuste sua instância e autenficiação da Evolution",
+        "height": 300,
+        "width": 230,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        -352
+      ],
+      "id": "adcb0305-4953-4cc4-9d57-1a837349eda8",
+      "name": "Sticky Note22"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -5584,
+        -464
+      ],
+      "id": "8df7a6a0-24dd-49b1-a593-9e8b48ba28d3",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5efc6961-1ff7-4ef2-a772-7e9761592a3e",
+              "name": "Documento",
+              "value": "={{ $('Webhook1').item.json.body.data.message.base64 }}",
+              "type": "string"
+            },
+            {
+              "id": "003323ec-ffbe-4c91-b8b5-623466b5014d",
+              "name": "MensagemDocumento",
+              "value": "={{ $('Webhook1').item.json.body.data.message.documentWithCaptionMessage.message.documentMessage.caption }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4912,
+        -48
+      ],
+      "id": "c760669a-23b7-45b4-a8c6-a72aee5e28da",
+      "name": "Mensagem Documento PDF",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3bdce7b6-d0f1-442c-aafd-8cd123aa21b6",
+              "name": "EsperaBuffer",
+              "value": 10,
+              "type": "number"
+            },
+            {
+              "id": "c38e8985-4494-40a4-878e-f25467849842",
+              "name": "TempoInatividadeAgente",
+              "value": 900,
+              "type": "number"
+            },
+            {
+              "id": "ac619a5e-1438-4e19-aaf5-21dfcbc32312",
+              "name": "ModeloTemperatura",
+              "value": 0.4,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -6832,
+        -304
+      ],
+      "id": "d2075f8e-5d3f-4b2f-b30a-ea2858623318",
+      "name": "Parametros Fluxo",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "content": "### Tratamento de Mensagens\nCada canal pode nos enviar as informações de diferentes formas e aqui trataremos elas de acordo.\n",
+        "height": 1080,
+        "width": 450,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4704,
+        -784
+      ],
+      "id": "3e4528fa-fc7b-4f95-86a3-99e9fa605e4b",
+      "name": "Sticky Note24"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "Imagem",
+        "options": {
+          "mimeType": "image/png"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -4656,
+        -208
+      ],
+      "id": "168ff122-9c53-4597-9ece-7ae6a227bccc",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "Audio",
+        "options": {
+          "mimeType": "audio/mp4"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -4656,
+        -368
+      ],
+      "id": "71a4c5e1-36e9-4e2f-b9f7-3e9db977d4b3",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "Documento",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -4656,
+        -48
+      ],
+      "id": "5fdc416c-9a4e-4107-81e6-7b468da8dbe4",
+      "name": "Convert to File2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1ce011b-bd95-468e-863e-f2076f644cf9",
+              "name": "Texto",
+              "value": "={{ $('Webhook1').item.json.body.data.message.extendedTextMessage.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4912,
+        -528
+      ],
+      "id": "2b4d44c5-a68d-44cf-921e-bf3cfc0bba04",
+      "name": "Mensagem Texto2",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://detbsilb-evolution.cloudfy.cloud/message/sendText/Agente-bravasolar",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "630455914F02-42E3-B131-D4472597D9F9"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $('Dados Lead').item.json.IdConversa }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json['output.mensagens'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5d5ed707-1465-4540-8c6a-eb6d478e30ed",
+      "name": "(EVO) Enviar Mensagem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        -240
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lSEY2eNDNCE9T6eu",
+          "name": "Header Auth account"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"mensagens\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    }\n  },\n  \"required\": [\"mensagens\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -336,
+        -48
+      ],
+      "id": "63b6e482-a538-466a-8305-4a3d2241e652",
+      "name": "Structured Output Parser [Schema]",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "content": "![Source example](https://raw.githubusercontent.com/EvolutionAPI/evolution-api/main/public/images/cover.png)\n",
+        "height": 120,
+        "width": 220,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -7008,
+        -1088
+      ],
+      "id": "ff753470-3c9b-418f-82f1-e00c2ddf986f",
+      "name": "Sticky Note26"
+    },
+    {
+      "parameters": {
+        "content": "![Source example](https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/800px-WhatsApp.svg.png)\n",
+        "width": 160,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -7264,
+        -1136
+      ],
+      "id": "58a8809e-7338-45c6-82e1-98a1ec6dafc2",
+      "name": "Sticky Note27"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<mensagem_do_usuario>\n{{ $json.output }}\n</mensagem_do_usuario>",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Apenas estruture a <mensagem_do_usuario> no formato JSON solicitado no output parser e seguindo as instruções de formatação abaixo. Não altere nada mais na mensagem\n\n# Formatação\n- Divida as mensagens para que fiquem naturais e humanizadas;\n- Divida as mensagens conforme estrutura do output parser para que não fiquem muito longas (maiores que 240 caractéres);\n- Não separe mensagens vazias;\n- Use quebras de linhas (\\n\\n) após pontos finais;\n- Para negrito (bold) use apenas um '' nunca duas '' (exemplo: *negrito).\n\nExemplo de formato JSON:\n{\n\"mensagens\": [\"Mensagem 0\", \"Mensagem 1\", \"Mensagem 2\"]\n}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        -624,
+        -384
+      ],
+      "id": "ba30784b-64fc-40aa-a3b4-24ff541db7ef",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Dados Lead').item.json.IdConversa }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -1104,
+        -160
+      ],
+      "id": "c3876ded-dd51-41a9-be70-9adb3776190a",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "e2lg4ParhqsVQIII",
+          "name": "Supabase Postgres BravaSol"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "e021a995-1341-49f1-bf98-ebb9007576d6",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        336,
+        320
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableName": {
+          "__rl": true,
+          "value": "energia_solar_base_conhecimento",
+          "mode": "list",
+          "cachedResultName": "energia_solar_base_conhecimento"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "3187fb5a-ea0a-4244-8e32-f114eb77a344",
+      "name": "Supabase Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1,
+      "position": [
+        80,
+        176
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5K8QedveA5xu99g3",
+          "name": "supabase bravaIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "buscar_documentos",
+        "description": "Busca informações relevantes na base de conhecimento da empresa. Use esta ferramenta quando o usuário fizer perguntas específicas sobre produtos, serviços, políticas ou procedimentos da empresa.",
+        "topK": 3
+      },
+      "id": "2bab3544-5a62-4704-8302-9b88012ba94f",
+      "name": "Ferramenta Busca Documentos",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        432,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "d41e8543-5d4c-4960-9303-37e4bfd97824",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        656,
+        320
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "3bbadbef-b282-411e-904a-21c3fc5be18e",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -7168,
+        -304
+      ],
+      "id": "4acb7af7-cd1d-4a93-abbf-dd009153bfa3",
+      "name": "Webhook1",
+      "webhookId": "3bbadbef-b282-411e-904a-21c3fc5be18e"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        -64
+      ],
+      "id": "8d83404f-5b22-46c1-b8b4-048407598162",
+      "name": "Calculator"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Mensagem Texto1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagem Texto2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagem Audio1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagem Imagem1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagem Documento PDF",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagem Erro1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcrever Áudio1": {
+      "main": [
+        [
+          {
+            "node": "Add Audio Buffer1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "Add Imagem Buffer1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Buffer 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ComparandoMensagens1": {
+      "main": [
+        [
+          {
+            "node": "Apagar Buffer1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem1": {
+      "main": [
+        [
+          {
+            "node": "Encontrar Cliente1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Encontrar Cliente1": {
+      "main": [
+        [
+          {
+            "node": "Cliente Existe?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cliente Existe?1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Criar Cliente1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Cliente1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buffer ": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buffer 3": {
+      "main": [
+        [
+          {
+            "node": "ComparandoMensagens1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Texto Buffer1": {
+      "main": [
+        [
+          {
+            "node": "Buffer ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apagar Buffer1": {
+      "main": [
+        [
+          {
+            "node": "Mensagem1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro Inicial1": {
+      "main": [
+        [
+          {
+            "node": "Dados Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem Texto1": {
+      "main": [
+        [
+          {
+            "node": "Add Texto Buffer1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem Audio1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem Imagem1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Audio Buffer1": {
+      "main": [
+        [
+          {
+            "node": "Buffer ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Error Buffer1": {
+      "main": [
+        [
+          {
+            "node": "Buffer ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Add PDF Buffer1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem Erro1": {
+      "main": [
+        [
+          {
+            "node": "Add Error Buffer1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add PDF Buffer1": {
+      "main": [
+        [
+          {
+            "node": "Buffer ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Imagem Buffer1": {
+      "main": [
+        [
+          {
+            "node": "Buffer ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "(EVO) Enviar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-fixing Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "Bot Desativado?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot Desativado?1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Auto-fixing Output Parser1",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados Lead": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem Documento PDF": {
+      "main": [
+        [
+          {
+            "node": "Convert to File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parametros Fluxo": {
+      "main": [
+        [
+          {
+            "node": "Filtro Inicial1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Transcrever Áudio1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File2": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem Texto2": {
+      "main": [
+        [
+          {
+            "node": "Add Texto Buffer1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "(EVO) Enviar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser [Schema]": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Auto-fixing Output Parser1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ferramenta Busca Documentos",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ferramenta Busca Documentos": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Ferramenta Busca Documentos",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Parametros Fluxo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "921a790b-18e0-4869-9ad3-5c744eaa466e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b1646430cd996814a4d81c1dfc7a9b1eaf95135bc455fab10103bd949f30c6d7"
+  },
+  "id": "HB4xToMeZ8PtHJiA",
+  "tags": [
+    {
+      "createdAt": "2025-07-15T12:43:04.914Z",
+      "updatedAt": "2025-07-15T12:43:04.914Z",
+      "id": "BjKWNW4Zqd2Ww649",
+      "name": "NoCode StartUp"
+    },
+    {
+      "createdAt": "2025-08-14T10:18:09.462Z",
+      "updatedAt": "2025-08-14T10:18:09.462Z",
+      "id": "xjdLM87cMO54KSIB",
+      "name": "NegócioComAgentesDeIA"
+    }
+  ]
+}

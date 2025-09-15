@@ -1,0 +1,774 @@
+{
+  "name": "Agente CLÍNICA ODONTO",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-incoming",
+        "options": {}
+      },
+      "id": "9b62b43a-f319-4965-a583-f277cc7d5022",
+      "name": "Webhook: Mensagem WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -288,
+        -80
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "519c2e42-eaaa-41ac-90e0-a87a5def62a1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.message.text }}",
+              "operation": "isEmpty"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bbfe6c27-06f1-48de-9bca-a19d6194cd14",
+      "name": "IF: Mensagem Válida?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        16,
+        -80
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.body.message.from }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"Por favor, envie uma mensagem válida com sua solicitação (ex.: agendar consulta, cancelar, consultar horários).\"\n}",
+        "options": {}
+      },
+      "id": "031c1a31-3002-4731-8a4c-922296e14713",
+      "name": "Erro: Mensagem Inválida",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        320,
+        128
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "modelId": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "aae91720-60c7-4aa5-885f-c17b45812735",
+      "name": "Processar Intenção (OpenAI)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        320,
+        -80
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.intent }}",
+              "value2": "agendar"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d3631582-8f4a-4be1-ac77-8953d3195cee",
+      "name": "IF: Agendamento?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        624,
+        -80
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.data.numero_whatsapp }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"{{ $json.message || 'Desculpe, não entendi sua solicitação. Por favor, envie algo como: Agendar consulta para [nome] em [data] às [hora] para [tipo de consulta].' }}\"\n}",
+        "options": {}
+      },
+      "id": "79bdfac5-461c-4426-9259-8178bc78ce83",
+      "name": "Responder: Outro Intento",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        912,
+        128
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "1545c3be-1f0f-4265-9874-28e0e5b60629",
+      "name": "Verificar Disponibilidade (Google Calendar)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        912,
+        -80
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.events.length === 0 }}",
+              "value2": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1404382f-736d-4cb3-8e47-69e726308140",
+      "name": "IF: Horário Disponível?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1216,
+        -80
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.data.numero_whatsapp }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"Desculpe, o horário solicitado ({{ $json.data.data }} às {{ $json.data.hora }}) não está disponível. Por favor, escolha outro horário.\"\n}",
+        "options": {}
+      },
+      "id": "afb586ab-473b-438f-98b8-c00636bc7d00",
+      "name": "Erro: Horário Indisponível",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1520,
+        128
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "start": "",
+        "end": "",
+        "additionalFields": {
+          "description": "Paciente: {{ $json.data.nome_paciente }} | WhatsApp: {{ $json.data.numero_whatsapp }} | Tipo: {{ $json.data.tipo_consulta }}"
+        }
+      },
+      "id": "9b9e7c2b-7813-4d1a-8dfa-cd2fd6370c04",
+      "name": "Criar Evento (Google Calendar)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        1520,
+        -80
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "insert"
+      },
+      "id": "bf17042d-452e-4c23-8212-fe2e10a4080a",
+      "name": "Registrar no Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        1824,
+        -80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.data.numero_whatsapp }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"Consulta agendada com sucesso!\\n\\nPaciente: {{ $json.data.nome_paciente }}\\nData: {{ $json.data.data }} às {{ $json.data.hora }}\\nTipo: {{ $json.data.tipo_consulta }}\\n\\nAguardamos sua confirmação 24h antes da consulta.\"\n}",
+        "options": {}
+      },
+      "id": "b03549ad-23bf-4f2d-8340-eca3245456f3",
+      "name": "Enviar Confirmação (WhatsApp)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2112,
+        -80
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "e53aa2d8-ac7e-4f3f-9ced-4b690d0eec2f",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -272,
+        -1056
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery"
+      },
+      "id": "485f194c-169a-4c5f-b0d0-1821dac9cc7a",
+      "name": "Verificar Agendamentos (Supabase)",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        32,
+        -1056
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ new Date($json.data_hora).getTime() }}",
+              "operation": "equal",
+              "value2": "={{ new Date(new Date().getTime() + 24*60*60*1000).setSeconds(0, 0) }}"
+            },
+            {
+              "value1": "={{ new Date($json.data_hora).getTime() }}",
+              "operation": "equal",
+              "value2": "={{ new Date(new Date().getTime() + 2*60*60*1000).setSeconds(0, 0) }}"
+            }
+          ],
+          "combineOperation": "any"
+        },
+        "options": {}
+      },
+      "id": "4020ad16-99bf-40da-9156-05d87ae5ed36",
+      "name": "IF: 24h ou 2h Antes?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        336,
+        -1056
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.numero_whatsapp }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"Olá, {{ $json.nome_paciente }}! Confirmamos sua consulta para {{ new Date($json.data_hora).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) }} ({{ $json.tipo_consulta }}). Responda 'Confirmar' ou 'Cancelar'.\",\n  \"buttons\": [{\"buttonId\": \"confirmar_{{ $json.id }}\", \"buttonText\": {\"displayText\": \"Confirmar\"}}, {\"buttonId\": \"cancelar_{{ $json.id }}\", \"buttonText\": {\"displayText\": \"Cancelar\"}}]\n}",
+        "options": {}
+      },
+      "id": "65c564ff-ece8-430b-b617-936fff26266c",
+      "name": "Notificação: Confirmação 24h",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        624,
+        -1152
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.numero_whatsapp }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"Lembrete: Sua consulta ({{ $json.tipo_consulta }}) está marcada para hoje, {{ new Date($json.data_hora).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) }}. Te esperamos!\"\n}",
+        "options": {}
+      },
+      "id": "5d444d3d-467b-4e42-8512-cd7cf2097ca6",
+      "name": "Notificação: Lembrete 2h",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        624,
+        -960
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-responses",
+        "options": {}
+      },
+      "id": "330bc33b-d866-4fd1-808e-b4ba79528299",
+      "name": "Webhook: Resposta WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -288,
+        -576
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "3c65a013-6d07-47f7-bd50-89c75f136537"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.message.buttonResponse.buttonId }}",
+              "operation": "startsWith",
+              "value2": "confirmar_"
+            },
+            {
+              "value1": "={{ $json.body.message.buttonResponse.buttonId }}",
+              "operation": "startsWith",
+              "value2": "cancelar_"
+            }
+          ],
+          "combineOperation": "any"
+        },
+        "options": {}
+      },
+      "id": "440a5c7e-69ed-4236-9e10-d32bac7ebbd4",
+      "name": "IF: Resposta Válida?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        16,
+        -576
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.body.message.from }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"Por favor, use os botões 'Confirmar' ou 'Cancelar' para responder à notificação de consulta.\"\n}",
+        "options": {}
+      },
+      "id": "bd2ca1c0-c7d1-489c-9470-9df006f11c47",
+      "name": "Erro: Resposta Inválida",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        320,
+        -368
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery"
+      },
+      "id": "43c80596-d4ed-4617-9ad2-bcbb2a5d8ae3",
+      "name": "Buscar Agendamento (Supabase)",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        320,
+        -576
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.message.buttonResponse.buttonId }}",
+              "operation": "startsWith",
+              "value2": "confirmar_"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "35324b60-e22a-4858-a8d1-e8c8a0704193",
+      "name": "IF: Confirmar?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        624,
+        -576
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "update"
+      },
+      "id": "330a0af9-ecc8-444f-94fb-7162bb759847",
+      "name": "Atualizar Status: Confirmado",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        912,
+        -672
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "eventId": "={{ $json.google_event_id }}",
+        "options": {}
+      },
+      "id": "3c0ded7c-74fe-4a40-8589-d519542c0ca3",
+      "name": "Deletar Evento (Google Calendar)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        912,
+        -480
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "update"
+      },
+      "id": "a127eb36-2407-4575-9e24-badb3a4fe310",
+      "name": "Atualizar Status: Cancelado",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        1216,
+        -480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.numero_whatsapp }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"Consulta cancelada com sucesso. Se precisar, entre em contato para reagendar.\"\n}",
+        "options": {}
+      },
+      "id": "421fa4d3-b384-4eec-bac6-dc3f643994b6",
+      "name": "Enviar Cancelamento (WhatsApp)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1520,
+        -480
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api.com/v1/messages/send",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.numero_whatsapp }}\",\n  \"instance\": \"clinicaodontologica\",\n  \"text\": \"Consulta confirmada! Te esperamos em {{ new Date($json.data_hora).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) }} para {{ $json.tipo_consulta }}.\"\n}",
+        "options": {}
+      },
+      "id": "6823a5c1-530d-496f-9ad5-2ab1814be0ef",
+      "name": "Enviar Confirmação (WhatsApp)1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1216,
+        -672
+      ],
+      "typeVersion": 4.2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook: Mensagem WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "IF: Mensagem Válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Mensagem Válida?": {
+      "main": [
+        [
+          {
+            "node": "Processar Intenção (OpenAI)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Mensagem Inválida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Intenção (OpenAI)": {
+      "main": [
+        [
+          {
+            "node": "IF: Agendamento?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Agendamento?": {
+      "main": [
+        [
+          {
+            "node": "Verificar Disponibilidade (Google Calendar)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder: Outro Intento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Disponibilidade (Google Calendar)": {
+      "main": [
+        [
+          {
+            "node": "IF: Horário Disponível?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Horário Disponível?": {
+      "main": [
+        [
+          {
+            "node": "Criar Evento (Google Calendar)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Horário Indisponível",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Evento (Google Calendar)": {
+      "main": [
+        [
+          {
+            "node": "Registrar no Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar no Supabase": {
+      "main": [
+        [
+          {
+            "node": "Enviar Confirmação (WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Verificar Agendamentos (Supabase)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Agendamentos (Supabase)": {
+      "main": [
+        [
+          {
+            "node": "IF: 24h ou 2h Antes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: 24h ou 2h Antes?": {
+      "main": [
+        [
+          {
+            "node": "Notificação: Confirmação 24h",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notificação: Lembrete 2h",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook: Resposta WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "IF: Resposta Válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Resposta Válida?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Agendamento (Supabase)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Resposta Inválida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Agendamento (Supabase)": {
+      "main": [
+        [
+          {
+            "node": "IF: Confirmar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Confirmar?": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Status: Confirmado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Deletar Evento (Google Calendar)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Status: Confirmado": {
+      "main": [
+        [
+          {
+            "node": "Enviar Confirmação (WhatsApp)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deletar Evento (Google Calendar)": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Status: Cancelado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Status: Cancelado": {
+      "main": [
+        [
+          {
+            "node": "Enviar Cancelamento (WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6be71063-983f-44c1-9989-47f48e85aeba",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b1646430cd996814a4d81c1dfc7a9b1eaf95135bc455fab10103bd949f30c6d7"
+  },
+  "id": "QllSd3pxy8zxWMrd",
+  "tags": []
+}

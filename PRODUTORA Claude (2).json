@@ -1,0 +1,357 @@
+{
+  "name": "PRODUTORA Claude",
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-5-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Você é um especialista em marketing digital para empresas de energia renovável/solar. Crie uma legenda curta e profissional para um post de Instagram da empresa Uzzi Energia Renováveis. O tema do post é: \"{{$json[\"fields\"][\"A Ideia / Título\"]}}\". Finalize com uma chamada para ação, incentivando a pedir um orçamento."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a2ff28c1-f191-454d-9c81-71d425423d95",
+      "name": "OpenAI - Gerar Conteúdo",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        -448
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "tema_post"
+            },
+            {
+              "name": "=cliente",
+              "stringValue": "Uzzi Energia Renováveis"
+            },
+            {
+              "name": "tema_post",
+              "stringValue": "={{$('Airtable - Get Record').json.fields}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8310433c-f5c9-4738-b623-4ced8b821d98",
+      "name": "Set - Formatar Dados OpenAI",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        1632,
+        -448
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hcti.io/v1/image",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "<div class='post-container'><div class='header'><h1 class='titulo'>{{$json.tema_post}}</h1></div><div class='content'><p class='legenda'>{{$json.legenda_gerada}}</p></div><div class='footer'><span class='cliente'>{{$json.cliente}}</span></div></div>"
+            },
+            {
+              "name": "css",
+              "value": ".post-container{width:1080px;height:1080px;background:linear-gradient(135deg,{{$json.cor_principal}},{{$json.cor_principal}}90);display:flex;flex-direction:column;justify-content:space-between;padding:60px;box-sizing:border-box;font-family:'Inter',sans-serif}.header{text-align:center}.titulo{font-size:48px;font-weight:800;color:white;margin:0;text-shadow:2px 2px 4px rgba(0,0,0,0.3);line-height:1.2}.content{flex:1;display:flex;align-items:center;padding:40px 0}.legenda{font-size:28px;line-height:1.4;color:white;text-align:center;margin:0;text-shadow:1px 1px 2px rgba(0,0,0,0.2)}.footer{text-align:center}.cliente{font-size:20px;font-weight:600;color:rgba(255,255,255,0.9);text-transform:uppercase;letter-spacing:2px}"
+            },
+            {
+              "name": "google_fonts",
+              "value": "Inter:400,600,800"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f121a841-66a6-4905-87fb-acbb175b5f74",
+      "name": "HTTP Request - HTML/CSS API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1824,
+        -448
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "7fcfd397-01d7-4293-82c3-2a5ab9be315b",
+      "name": "Set - Preparar Update",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        -448
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appEuKRXqAPj3DgMY",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "",
+          "mode": "id",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "df2b2431-9513-4ff2-8558-9b55f850c171",
+      "name": "Airtable - Atualizar Registro",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [
+        2272,
+        -448
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "OLkRCzsGXg98qzYL",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        976,
+        -448
+      ],
+      "id": "26bf6f60-5747-4eec-b09c-a9eb559d1e01",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableTokenApi",
+        "operation": "list",
+        "application": {
+          "__rl": true,
+          "value": "appEuKRXqAPj3DgMY",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblzeGiGzRy5k2J8f",
+          "mode": "id"
+        },
+        "additionalOptions": {}
+      },
+      "name": "Airtable - Get Record",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        -448
+      ],
+      "id": "adb596e0-04df-46f2-93df-779682104b87",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "OLkRCzsGXg98qzYL",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "OpenAI - Gerar Conteúdo": [
+      {
+        "json": {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Energia limpa, economia real. Com a Uzzi Energia Renováveis você reduz custos e valoriza seu imóvel com projetos solares sob medida. Peça um orçamento sem compromisso.",
+            "refusal": null,
+            "annotations": []
+          },
+          "finish_reason": "stop"
+        }
+      },
+      {
+        "json": {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Transforme sol em economia com a Uzzi Energia Renováveis. Soluções solares eficientes e personalizadas para sua casa ou empresa. Peça seu orçamento sem compromisso.",
+            "refusal": null,
+            "annotations": []
+          },
+          "finish_reason": "stop"
+        }
+      },
+      {
+        "json": {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Economize na conta e invista em energia limpa com a Uzzi Energia Renováveis — soluções sob medida, instalação segura e suporte técnico especializado. Peça um orçamento sem compromisso.",
+            "refusal": null,
+            "annotations": []
+          },
+          "finish_reason": "stop"
+        }
+      },
+      {
+        "json": {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Invista em energia limpa e reduza sua conta de luz com a Uzzi Energia Renováveis. Projetos sob medida, tecnologia eficiente e retorno garantido. Peça seu orçamento hoje mesmo.",
+            "refusal": null,
+            "annotations": []
+          },
+          "finish_reason": "stop"
+        }
+      },
+      {
+        "json": {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Energia limpa, economia real. Na Uzzi Energia Renováveis projetamos soluções solares sob medida para sua casa ou empresa. Solicite seu orçamento e comece a poupar.",
+            "refusal": null,
+            "annotations": []
+          },
+          "finish_reason": "stop"
+        }
+      },
+      {
+        "json": {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Economize com energia limpa. A Uzzi Energia Renováveis desenvolve soluções solares sob medida para sua casa ou empresa. Solicite um orçamento agora mesmo.",
+            "refusal": null,
+            "annotations": []
+          },
+          "finish_reason": "stop"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "OpenAI - Gerar Conteúdo": {
+      "main": [
+        [
+          {
+            "node": "Set - Formatar Dados OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set - Formatar Dados OpenAI": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request - HTML/CSS API": {
+      "main": [
+        [
+          {
+            "node": "Set - Preparar Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set - Preparar Update": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Atualizar Registro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Atualizar Registro": {
+      "main": [
+        []
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Get Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Get Record": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Gerar Conteúdo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "03c0e38d-5dc3-4a11-8401-c5f89642b9e5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b1646430cd996814a4d81c1dfc7a9b1eaf95135bc455fab10103bd949f30c6d7"
+  },
+  "id": "vLD1thowt4kLdZXI",
+  "tags": []
+}

@@ -1,0 +1,295 @@
+{
+  "name": "Produtora de Conteúdo Airtable",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "airtableTokenApi",
+        "operation": "list",
+        "application": {
+          "__rl": true,
+          "value": "appEuKRXqAPj3DgMY",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblzeGiGzRy5k2J8f",
+          "mode": "id"
+        },
+        "additionalOptions": {}
+      },
+      "name": "Airtable - Get Record",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        112
+      ],
+      "id": "c0e0b3b2-48d3-4669-83bc-5cde5e136501",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "OLkRCzsGXg98qzYL",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "=={{$json[\"fields\"][\"Status do Processo\"]}}",
+              "operation": "contains",
+              "value2": "A Fazer"
+            }
+          ]
+        }
+      },
+      "name": "IF - Status",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        112
+      ],
+      "id": "cb6258e3-47ef-4e5f-9ca2-73889c495734"
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "model": "gpt-5-mini",
+        "prompt": {
+          "messages": [
+            {
+              "content": "=Você é um especialista em marketing digital para empresas de energia renovável/solar. Crie uma legenda curta e profissional para um post de Instagram da empresa Uzzi Energia Renováveis. O tema do post é: \"{{$json[\"fields\"][\"A Ideia / Título\"]}}\". Finalize com uma chamada para ação, incentivando a pedir um orçamento."
+            }
+          ]
+        },
+        "simplifyOutput": false,
+        "options": {},
+        "requestOptions": {}
+      },
+      "name": "OpenAI - Gera Copy",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "46371396-5b69-4516-b8cc-4672d924a3dd",
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableTokenApi",
+        "operation": "update",
+        "application": {
+          "__rl": true,
+          "value": "appEuKRXqAPj3DgMY",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblzeGiGzRy5k2J8f",
+          "mode": "id"
+        },
+        "id": "={{$json[\"id\"]}}",
+        "updateAllFields": false,
+        "fields": [
+          "={\n  \"Status do Processo\": \"processing\"\n}\n\n"
+        ],
+        "options": {}
+      },
+      "name": "Airtable - Update Record",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        176,
+        0
+      ],
+      "id": "6fb078c9-66fe-4f45-845f-e356e702ef41",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "OLkRCzsGXg98qzYL",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "url": "https://api.placid.app/api/rest/images",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "name": "HTTP - Placid Gera Imagem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "4d9b34f1-ae0c-4762-8bdf-140e32f32a84",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": null,
+          "name": "Placid API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "unit": "seconds"
+      },
+      "name": "Wait - Polling",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "d24c7ba8-32d9-4ef8-8949-a8015f4fd3e1",
+      "webhookId": "1a565487-5991-4f34-b34c-d763cd64680b"
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "url": "={{$json[\"polling_url\"]}}",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "name": "HTTP - Placid Poll",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "83d7d702-a650-4ac0-8583-602215545918",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": null,
+          "name": "Placid API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "application": "appXXXXXXXX",
+        "table": "Imagens",
+        "id": "={{$json[\"id\"]}}",
+        "options": {}
+      },
+      "name": "Airtable - Salva Imagem Final",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "5c962467-ae7b-40e1-8e4c-39434b4985c5",
+      "credentials": {
+        "airtableApi": {
+          "id": null,
+          "name": "Airtable Credenciais"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Airtable - Get Record": {
+      "main": [
+        [
+          {
+            "node": "IF - Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Status": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Gera Copy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Gera Copy": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Update Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Update Record": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Placid Gera Imagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Placid Gera Imagem": {
+      "main": [
+        [
+          {
+            "node": "Wait - Polling",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait - Polling": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Placid Poll",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Placid Poll": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Salva Imagem Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7f52fbf2-9ff3-44d7-ae86-bbaceb5755d7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b1646430cd996814a4d81c1dfc7a9b1eaf95135bc455fab10103bd949f30c6d7"
+  },
+  "id": "ynApTJtjLqdWzxlU",
+  "tags": []
+}

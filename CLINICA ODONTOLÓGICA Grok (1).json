@@ -1,0 +1,1674 @@
+{
+  "name": "CLINICA ODONTOLÓGICA Grok",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-incoming",
+        "options": {}
+      },
+      "id": "d05a03c7-a1d4-42ad-a446-33f0f87332cb",
+      "name": "Webhook: Mensagem WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -944,
+        1184
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "519c2e42-eaaa-41ac-90e0-a87a5def62a1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://detbsilb-evolution.cloudfy.cloud/message/sendText/agentestestes001",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.body.message.from }}\",\n  \"instance\": \"agentetestes001\",\n  \"text\": \"Por favor, envie uma mensagem válida com sua solicitação (ex.: agendar consulta, cancelar, consultar horários).\"\n}",
+        "options": {}
+      },
+      "id": "a4109da1-1e18-4d14-b569-5557d3ff22c0",
+      "name": "Erro: Mensagem Inválida",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -688,
+        1424
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FFStOBnE5SVdi3KV",
+          "name": "Header Auth account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "587b1936780e52474cb24386c89d46d94c19550d1c2cf288f40a101085f727b3@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Clínica Odontológica"
+        },
+        "options": {}
+      },
+      "id": "297f684c-44d4-4a15-b134-9cc75e966418",
+      "name": "Obter Horários Disponíveis (Google Calendar)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        752,
+        1424
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "QYFiM46kpUfkCoUv",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://detbsilb-evolution.cloudfy.cloud/message/sendText/agentestestes001",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Webhook: Mensagem WhatsApp').item.json.body.key.remoteJid }}\",\n  \"instance\": \"agentetestes001\",\n  \"text\": \"Claro! Para qual dia você gostaria de verificar os horários disponíveis?\"\n}",
+        "options": {}
+      },
+      "id": "7a5fd052-1fb6-422a-8922-228edda839f5",
+      "name": "Responder: Horários Disponíveis",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1040,
+        1600
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FFStOBnE5SVdi3KV",
+          "name": "Header Auth account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://detbsilb-evolution.cloudfy.cloud/message/sendText/agentestestes001",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Webhook: Mensagem WhatsApp').item.json.body.key.remoteJid }}\",\n  \"textMessage\": {\n    \"text\": \"Desculpe, não entendi sua solicitação. Você gostaria de agendar, cancelar ou consultar horários?\"\n  }\n}\n",
+        "options": {}
+      },
+      "id": "3f0436ed-8ae1-4237-8e67-95c72cf0037c",
+      "name": "Responder: Outro Intento",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        768,
+        1648
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FFStOBnE5SVdi3KV",
+          "name": "Header Auth account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "587b1936780e52474cb24386c89d46d94c19550d1c2cf288f40a101085f727b3@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Clínica Odontológica"
+        },
+        "timeMin": "={{ new Date(new Date($json.output.data_consulta).setHours(0, 0, 0, 0)).toISOString() }}",
+        "timeMax": "={{ new Date(new Date($json.output.data_consulta).setHours(23, 59, 59, 999)).toISOString() }}",
+        "options": {}
+      },
+      "id": "aa8cd8fd-df7a-48d4-9914-314f6614d740",
+      "name": "Verificar Disponibilidade (Google Calendar)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        416,
+        1152
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "QYFiM46kpUfkCoUv",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "aab0155a-9509-429d-8fa9-51583908a5b6",
+              "leftValue": "={{ $items().length }}",
+              "rightValue": "={{ 0 }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5cb383f3-0d24-4ad0-a0b2-8bc5724142a0",
+      "name": "IF: Horário Disponível?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        720,
+        1152
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://detbsilb-evolution.cloudfy.cloud/message/sendText/agentestestes001",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Webhook: Mensagem WhatsApp').item.json.body.key.remoteJid }}\",\n  \"instance\": \"agentetestes001\",\n  \"text\": \"Desculpe, o horário solicitado ({{ $json.output.data_consulta }} às {{ $json.output.hora_consulta }}) não está disponível. Por favor, escolha outro horário.\"\n}",
+        "options": {}
+      },
+      "id": "0cde90ea-7a98-4f0f-b313-1226b5dd321b",
+      "name": "Erro: Horário Indisponível",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1040,
+        1376
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FFStOBnE5SVdi3KV",
+          "name": "Header Auth account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "587b1936780e52474cb24386c89d46d94c19550d1c2cf288f40a101085f727b3@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Clínica Odontológica"
+        },
+        "start": "={{ $json.output.data_consulta }}T{{ $json.output.hora_consulta }}",
+        "end": "={{ new Date(new Date($json.output.data_consulta + 'T' + $json.output.hora_consulta).getTime() + 60*60*1000).toISOString() }}",
+        "additionalFields": {
+          "description": "=Paciente: {{ $json.output.nome_paciente }} Tipo de Consulta: {{ $json.output.tipo_consulta }} Contato: {{ $('Webhook: Mensagem WhatsApp').item.json.body.key.remoteJid }} Agendado via Chatbot.",
+          "summary": "={{ $json.output.tipo_consulta }} - {{ $json.output.nome_paciente }}"
+        }
+      },
+      "id": "b2b4e532-ebb5-467c-9ec8-f968a3ae5e4f",
+      "name": "Criar Evento (Google Calendar)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        1024,
+        1152
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "QYFiM46kpUfkCoUv",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "agendamentos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome_paciente",
+              "fieldValue": "={{ $json.output.nome_paciente }}"
+            },
+            {
+              "fieldId": "tipo_consulta",
+              "fieldValue": "={{ $json.output.tipo_consulta }}"
+            },
+            {
+              "fieldId": "data_hora",
+              "fieldValue": "={{ $json.output.data_consulta }}T{{ $json.output.hora_consulta }}"
+            },
+            {
+              "fieldId": "contato_whatsapp",
+              "fieldValue": "={{ $('Webhook: Mensagem WhatsApp').item.json.body.key.remoteJid }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "=Agendado"
+            },
+            {
+              "fieldId": "google_calendar_event_id",
+              "fieldValue": "={{ $('Criar Evento (Google Calendar)').item.json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "558f7688-3a97-4f3f-b7a5-94b43198fd0f",
+      "name": "Registrar no Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        1328,
+        1152
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "5K8QedveA5xu99g3",
+          "name": "supabase bravaIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://detbsilb-evolution.cloudfy.cloud/message/sendText/agentestestes001",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.contato_whatsapp }}\",\n  \"instance\": \"agentetestes001\",\n  \"text\": \"Consulta confirmada! Te esperamos em {{ new Date($json.data_hora).toLocaleDateString('pt-BR') }} às {{ new Date(new Date($json.data_hora).getTime() + 3 * 60 * 60 * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }} para {{ $json.tipo_consulta }}. Obrigado por confirmar!\"\n}",
+        "options": {}
+      },
+      "id": "bae65ad8-50bf-455e-807d-3740a31c828c",
+      "name": "Enviar Confirmação (WhatsApp)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        400,
+        560
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FFStOBnE5SVdi3KV",
+          "name": "Header Auth account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "36302109-76f7-4867-b092-db06ef888cf9",
+      "name": "Schedule Trigger (A cada hora)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -928,
+        96
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "agendamentos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "data_hora",
+              "condition": "gt",
+              "keyValue": "={{ new Date().toISOString() }}"
+            }
+          ]
+        }
+      },
+      "id": "7be7741a-a275-4de9-8b28-2e9e1291b1c0",
+      "name": "Verificar Agendamentos (Supabase)",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        -624,
+        96
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "5K8QedveA5xu99g3",
+          "name": "supabase bravaIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9cfded62-a294-4535-b01c-a06b71beed51",
+              "leftValue": "={{ $json.body.message.buttonResponse.buttonId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "12c29d28-6473-46d7-bc81-068d86520d4b",
+              "leftValue": "={{ $json.body.message.buttonResponse.buttonId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ef3c4e5b-f464-4c1a-8550-25aa9ad39b76",
+      "name": "IF: Resposta Válida?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -928,
+        656
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://detbsilb-evolution.cloudfy.cloud/message/sendText/agentestestes001",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Webhook: Resposta WhatsApp').item.json.body.key.remoteJid }}\",\n  \"instance\": \"agentetestes001\",\n  \"text\": \"Por favor, use os botões 'Confirmar' ou 'Cancelar' para responder à notificação de consulta.\"\n}",
+        "options": {}
+      },
+      "id": "0c251cbb-1787-480d-b9b4-e66f5e2d8779",
+      "name": "Erro: Resposta Inválida",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -704,
+        880
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FFStOBnE5SVdi3KV",
+          "name": "Header Auth account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "agendamentos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $('Edit Fields').item.json.agendamento_id }}"
+            }
+          ]
+        }
+      },
+      "id": "4b1f5493-2cc3-49cf-9c60-cbb51191dba7",
+      "name": "Buscar Agendamento (Supabase)",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        -464,
+        656
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "5K8QedveA5xu99g3",
+          "name": "supabase bravaIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "64bbbabb-76bd-4f25-8521-3cdd00174e07",
+              "leftValue": "={{ $('Webhook: Resposta WhatsApp').item.json.body.message.buttonResponse.buttonId }}",
+              "rightValue": "confirmar_",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8efd9035-4f1c-4acc-bd4f-3a59fd6ce7b2",
+      "name": "IF: Confirmar?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -256,
+        656
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "agendamentos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Edit Fields').item.json.agendamento_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "=Confirmado"
+            }
+          ]
+        }
+      },
+      "id": "e6ddd664-7686-45cd-99a3-04a6b31d3226",
+      "name": "Atualizar Status: Confirmado",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        96,
+        560
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "5K8QedveA5xu99g3",
+          "name": "supabase bravaIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "calendar": {
+          "__rl": true,
+          "value": "587b1936780e52474cb24386c89d46d94c19550d1c2cf288f40a101085f727b3@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Clínica Odontológica"
+        },
+        "eventId": "={{ $json.google_event_id }}",
+        "options": {}
+      },
+      "id": "1dabf311-acaa-4cbe-97a3-156f21416713",
+      "name": "Verificar Evento Existe (Google Calendar)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        96,
+        752
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "QYFiM46kpUfkCoUv",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "aa0e183d-d7ec-4783-80fd-ce7e132bd4b9",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "333f9f7b-5fb9-495c-8004-697dd21066d6",
+      "name": "IF: Evento Existe?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        400,
+        752
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "587b1936780e52474cb24386c89d46d94c19550d1c2cf288f40a101085f727b3@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Clínica Odontológica"
+        },
+        "eventId": "={{ $json.google_event_id }}",
+        "options": {}
+      },
+      "id": "456bfa2e-5a3b-4d6c-afef-fcb88e9eda22",
+      "name": "Deletar Evento (Google Calendar)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        704,
+        752
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "QYFiM46kpUfkCoUv",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "agendamentos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Buscar Agendamento (Supabase)').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "=Cancelado"
+            }
+          ]
+        }
+      },
+      "id": "d2afbd37-7442-4340-a867-d6ff4e0fe62b",
+      "name": "Atualizar Status: Cancelado",
+      "type": "n8n-nodes-base.supabase",
+      "position": [
+        1008,
+        752
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "5K8QedveA5xu99g3",
+          "name": "supabase bravaIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://detbsilb-evolution.cloudfy.cloud/message/sendText/agentestestes001",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "=number",
+              "value": "={{ $('Webhook: Resposta WhatsApp').item.json.body.key.remoteJid }}"
+            },
+            {
+              "name": "text",
+              "value": "O seu agendamento foi cancelado com sucesso. Se precisar de remarcar, é só me chamar!"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=number",
+              "value": "={{ $('Buscar Agendamento (Supabase)').item.json.contato_whatsapp }}"
+            },
+            {
+              "name": "text",
+              "value": "O seu agendamento foi cancelado com sucesso. Se precisar de remarcar, é só me chamar!"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "15ea2245-681f-4c26-abaf-da4c446bc64b",
+      "name": "Enviar Cancelamento (WhatsApp)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1312,
+        752
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FFStOBnE5SVdi3KV",
+          "name": "Header Auth account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://detbsilb-evolution.cloudfy.cloud/message/sendText/agentestestes001",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Buscar Agendamento (Supabase)').item.json.contato_whatsapp }}\",\n  \"instance\": \"agentetestes001\",\n  \"text\": \"Erro ao processar o cancelamento: O evento não foi encontrado no calendário. Por favor, entre em contato diretamente com a clínica para obter assistência.\"\n}",
+        "options": {}
+      },
+      "id": "2340c23a-13ef-4b07-911b-21f744ee1ccb",
+      "name": "Erro: Evento Não Encontrado",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        704,
+        944
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FFStOBnE5SVdi3KV",
+          "name": "Header Auth account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -432,
+        1392
+      ],
+      "id": "c6ae603b-d4c6-4341-b3d7-eb8c0a995cf0",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "c9iAooAo5TXPfWFM",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.data.key.remoteJid }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -304,
+        1408
+      ],
+      "id": "d70b3ea7-3245-45dc-be2b-6098d2f216c1",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "e2lg4ParhqsVQIII",
+          "name": "Supabase Postgres BravaSol"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2d44b0c1-2a7a-45fd-a36f-ac49c682a8ac",
+              "leftValue": "={{ $json.output.intent }}",
+              "rightValue": "consultar_horarios",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        1440
+      ],
+      "id": "8291956e-c9db-40c9-bd54-90a3f422ff6f",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6001a8f7-1639-489f-a444-4d1d74ab4560",
+              "leftValue": "={{ $json.json.tipo }}",
+              "rightValue": "24h",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "dd4334ec-3b1e-401b-b5ee-4f5324aeec0b",
+      "name": "IF 24h Antes",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        96,
+        -16
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f1669208-522c-4d44-98a8-d855bc71d204",
+              "leftValue": "={{ $json.json.tipo }}",
+              "rightValue": "2h",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d8d0c2d8-86bf-4728-8b13-221a4017eceb",
+      "name": "IF 2h Antes",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        96,
+        208
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://detbsilb-evolution.cloudfy.cloud/message/sendText/agentestestes001",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $json.paciente_telefone }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.mensagem }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c4a8f06a-ba41-4e57-9dcc-1d9912c99520",
+      "name": "Notificação 24h (Evolution API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        384,
+        -32
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://detbsilb-evolution.cloudfy.cloud/message/sendText/agentestestes001",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $json.paciente_telefone }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.mensagem }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7062198f-1999-426a-a149-8754bf6c80ed",
+      "name": "Notificação 2h (Evolution API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        384,
+        208
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsCode": "const agora = new Date();\nconst todosAgendamentos = $input.all(); // Pega todos os itens da entrada\nconst notificacoes = [];\n\nfor (const item of todosAgendamentos) {\n  const agendamento = item.json; // Acessa os dados de cada agendamento\n  const dataConsulta = new Date(agendamento.data_hora);\n  const diferencaHoras = (dataConsulta - agora) / (1000 * 60 * 60);\n\n  let tipoNotificacao = null;\n  let mensagem = '';\n  \n  // Condição 1: Verifica se precisa de notificação de 24h (e se o status é 'Agendado')\n  if (diferencaHoras >= 23.5 && diferencaHoras <= 24.5 && agendamento.status === 'Agendado') {\n    tipoNotificacao = '24h';\n    mensagem = `Olá, ${agendamento.nome_paciente}! Lembrete: você tem uma consulta (${agendamento.tipo_consulta}) agendada para amanhã. Por favor, responda 'Confirmar' ou 'Cancelar'.`;\n  }\n  \n  // Condição 2: Verifica se precisa de notificação de 2h (e se o status é 'Confirmado')\n  else if (diferencaHoras >= 1.5 && diferencaHoras <= 2.5 && agendamento.status === 'Confirmado') {\n    tipoNotificacao = '2h';\n    mensagem = `Lembrete: Sua consulta (${agendamento.tipo_consulta}) é daqui a 2 horas. Te esperamos!`;\n  }\n  \n  if (tipoNotificacao) {\n    // Adiciona o agendamento à lista de notificações a serem enviadas\n    notificacoes.push({\n      json: { // O n8n espera que os dados de saída estejam dentro de um objeto 'json'\n        tipo: tipoNotificacao,\n        paciente_telefone: agendamento.contato_whatsapp,\n        mensagem: mensagem,\n        agendamento_id: agendamento.id\n      }\n    });\n  }\n}\n\nreturn notificacoes;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        96
+      ],
+      "id": "1bebd9ca-2af1-4f3b-ae19-a227715132ad",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "8dc9f09b-d2bc-4665-9a40-a20d450049ce",
+      "name": "Verificar Cancelamentos (15min)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -928,
+        -432
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Verificar cancelamentos recentes (últimos 15 minutos)\nconst agora = new Date();\nconst quinzeMinutosAtras = new Date(agora.getTime() - 15 * 60 * 1000);\n\nreturn {\n  data_inicio: quinzeMinutosAtras.toISOString(),\n  data_fim: agora.toISOString()\n};"
+      },
+      "id": "98134498-8a67-482c-ad22-35f78ca52ff7",
+      "name": "Definir Período Verificação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -688,
+        -432
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "agendamentos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "=Cancelado"
+            },
+            {
+              "keyName": "data_cancelamento",
+              "condition": "gte",
+              "keyValue": "={{ $('Definir Período Verificação').item.json.data_inicio }}"
+            }
+          ]
+        }
+      },
+      "id": "b874d5ea-b76d-459f-b30b-3496cf285278",
+      "name": "Buscar Cancelamentos Recentes",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -432
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5K8QedveA5xu99g3",
+          "name": "supabase bravaIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cancelamentos = $input.all();\n\n// Para a execução se não houver cancelamentos para processar\nif (!cancelamentos || cancelamentos.length === 0) {\n  return null;\n}\n\nconst notificacoes = [];\n\n// Processa cada cancelamento encontrado\nfor (const item of cancelamentos) {\n  // Acessa os dados corretamente\n  const consulta = item.json; \n\n  const dataConsulta = new Date(consulta.data_hora).toLocaleDateString('pt-BR');\n  const horaConsulta = new Date(consulta.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });\n  const dataCancelamento = new Date(consulta.data_cancelamento).toLocaleString('pt-BR');\n\n  const mensagem = `🚨 ALERTA DE CANCELAMENTO 🚨\\n\\n` +\n    `A consulta do paciente **${consulta.nome_paciente}** foi cancelada.\\n\\n` +\n    `**Detalhes:**\\n` +\n    `📅 **Consulta:** ${consulta.tipo_consulta}\\n` +\n    `🗓️ **Data:** ${dataConsulta} às ${horaConsulta}\\n` +\n    `📱 **Contato:** ${consulta.contato_whatsapp}\\n` +\n    `❌ **Cancelado em:** ${dataCancelamento}`;\n\n  notificacoes.push({\n    json: { // O n8n espera que os dados de saída estejam dentro de um objeto 'json'\n      consulta_id: consulta.id,\n      mensagem_clinica: mensagem\n    }\n  });\n}\n\nreturn notificacoes;"
+      },
+      "id": "bceed7ef-7d69-4a6b-b958-c2ea61d6fee4",
+      "name": "Processar Cancelamentos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        -432
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://detbsilb-evolution.cloudfy.cloud/message/sendText/agentestestes001",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=number",
+              "value": "5571992214767"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.mensagem_clinica }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9e8036b6-6164-4d1b-8f11-d20aa554a3b6",
+      "name": "Notificar Clínica (WhatsApp)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -16,
+        -432
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FFStOBnE5SVdi3KV",
+          "name": "Header Auth account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "agendamentos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.consulta_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "notificacao_cancelamento_enviada",
+              "fieldValue": "true"
+            }
+          ]
+        }
+      },
+      "id": "4f826d76-beec-4c10-be91-7d8ed67d7601",
+      "name": "Marcar Como Notificada",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -432
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5K8QedveA5xu99g3",
+          "name": "supabase bravaIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "NOTIFICAR CANCELAMENTO",
+        "height": 272,
+        "width": 1408,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1008,
+        -496
+      ],
+      "typeVersion": 1,
+      "id": "beb91215-a00e-4169-8039-e1b8a3bb9282",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eb2083eb-aab1-4826-a210-fe0b2710accc",
+              "name": "=agendamento_id",
+              "value": "={{ $json.body.message.buttonResponse.buttonId.split('_')[1] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -704,
+        656
+      ],
+      "id": "6015429d-26f8-4ed8-91bb-a42c2ac3a8f0",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "83300400-b94a-401a-9f2c-6c97a552a5c7",
+              "leftValue": "={{ $json.body.data.message.conversation }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "cb019827-27c1-46c5-88ee-6a7c4a74ebcb",
+              "leftValue": "={{ $json.body.data.message.conversation }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "049549cf-4fb5-46c3-ab77-ad4adb7a73c7",
+      "name": "If: Mensagem Válida?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -672,
+        1184
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "570f1f71-7b0e-419d-bb07-36847e7963c5",
+              "leftValue": "={{ $json.output.intent }}",
+              "rightValue": "=agendar",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        1168
+      ],
+      "id": "aef2a75a-8cca-4c4d-94f1-1343fcbcb54f",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.data.message.conversation }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Você é um robô extrator de dados. Sua única função é converter o texto do usuário em um objeto JSON, seguindo o schema da ferramenta 'structured_output'.\n\n**REGRAS ABSOLUTAS:**\n1.  NUNCA responda com texto, frases ou saudações.\n2.  NUNCA tente usar a memória.\n3.  Sua ÚNICA saída deve ser o JSON formatado para a ferramenta 'structured_output'.\n4.  Analise o texto de entrada e preencha os campos do JSON.\n5.  Se uma informação não existir, use o valor `null`.\n\nData Atual para referência: {{ new Date().toISOString().split('T')[0] }}.\n\nExemplo de Entrada: \"quero marcar uma limpeza para amanhã\"\nSua Saída Obrigatória:\n{\n  \"intent\": \"agendar\",\n  \"nome_paciente\": null,\n  \"data_consulta\": \"2025-09-04\",\n  \"hora_consulta\": null,\n  \"tipo_consulta\": \"limpeza\"\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        1168
+      ],
+      "id": "6dcfeeec-99e2-446b-8b24-11b3a5c7f825",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"intent\": {\n      \"type\": \"string\",\n      \"description\": \"A intenção principal do usuário.\",\n      \"enum\": [\"agendar\", \"consultar_horarios\", \"cancelar\", \"confirmar\", \"outro\"]\n    },\n    \"nome_paciente\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Nome completo do paciente. Retorne null se não for mencionado.\"\n    },\n    \"data_consulta\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Data da consulta no formato AAAA-MM-DD. Retorne null se não for mencionada.\"\n    },\n    \"hora_consulta\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Hora da consulta no formato HH:mm. Retorne null se não for mencionada.\"\n    },\n    \"tipo_consulta\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"O motivo da consulta (ex: limpeza). Retorne null se não for mencionado.\"\n    }\n  },\n  \"required\": [\"intent\"]\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -144,
+        1392
+      ],
+      "id": "4b980ff7-a372-442c-a7a3-49e41904d6dd",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook: Mensagem WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "If: Mensagem Válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obter Horários Disponíveis (Google Calendar)": {
+      "main": [
+        [
+          {
+            "node": "Responder: Horários Disponíveis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Disponibilidade (Google Calendar)": {
+      "main": [
+        [
+          {
+            "node": "IF: Horário Disponível?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Horário Disponível?": {
+      "main": [
+        [
+          {
+            "node": "Criar Evento (Google Calendar)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Horário Indisponível",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Evento (Google Calendar)": {
+      "main": [
+        [
+          {
+            "node": "Registrar no Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar no Supabase": {
+      "main": [
+        [
+          {
+            "node": "Enviar Confirmação (WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger (A cada hora)": {
+      "main": [
+        [
+          {
+            "node": "Verificar Agendamentos (Supabase)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Agendamentos (Supabase)": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Resposta Válida?": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Resposta Inválida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Agendamento (Supabase)": {
+      "main": [
+        [
+          {
+            "node": "IF: Confirmar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Confirmar?": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Status: Confirmado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Verificar Evento Existe (Google Calendar)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Status: Confirmado": {
+      "main": [
+        [
+          {
+            "node": "Enviar Confirmação (WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Evento Existe (Google Calendar)": {
+      "main": [
+        [
+          {
+            "node": "IF: Evento Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Evento Existe?": {
+      "main": [
+        [
+          {
+            "node": "Deletar Evento (Google Calendar)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Evento Não Encontrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deletar Evento (Google Calendar)": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Status: Cancelado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Status: Cancelado": {
+      "main": [
+        [
+          {
+            "node": "Enviar Cancelamento (WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Obter Horários Disponíveis (Google Calendar)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder: Outro Intento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF 24h Antes": {
+      "main": [
+        [
+          {
+            "node": "Notificação 24h (Evolution API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF 2h Antes": {
+      "main": [
+        [
+          {
+            "node": "Notificação 2h (Evolution API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "IF 24h Antes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF 2h Antes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Cancelamentos (15min)": {
+      "main": [
+        [
+          {
+            "node": "Definir Período Verificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Definir Período Verificação": {
+      "main": [
+        [
+          {
+            "node": "Buscar Cancelamentos Recentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Cancelamentos Recentes": {
+      "main": [
+        [
+          {
+            "node": "Processar Cancelamentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Cancelamentos": {
+      "main": [
+        [
+          {
+            "node": "Notificar Clínica (WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificar Clínica (WhatsApp)": {
+      "main": [
+        [
+          {
+            "node": "Marcar Como Notificada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Buscar Agendamento (Supabase)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If: Mensagem Válida?": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Mensagem Inválida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Verificar Disponibilidade (Google Calendar)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d90a7234-55b1-4147-9f73-9e3004d6322b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b1646430cd996814a4d81c1dfc7a9b1eaf95135bc455fab10103bd949f30c6d7"
+  },
+  "id": "e9M2nLoYQSUCge19",
+  "tags": []
+}
